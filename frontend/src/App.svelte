@@ -7,18 +7,16 @@
   :global(body) {
     padding: 0;
   }
-
   .container {
-    height: 100%;
     width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  @media (min-width: 640px) {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 </style>
 
 <div class="container">
-  <UserMap class="user-map" />
-  <DriverMap class="driver-map" />
+  <UserMap />
+  <DriverMap />
 </div>

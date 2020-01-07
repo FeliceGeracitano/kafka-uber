@@ -21,8 +21,10 @@
 
 <style>
   .map {
-    height: 50vh;
-    width: 100vw;
+    width: 500px;
+    height: 500px;
+    margin: 1rem;
+    box-shadow: 0 1px 20px 3px #0000003d;
   }
 </style>
 

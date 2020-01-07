@@ -10,8 +10,9 @@
   onMount(() => {
     map = new mapbox.Map({
       container,
-      style: "mapbox://styles/felicegeracitano/ck51qxm9o02w41clj5swk76vi",
-      center: [0, 0]
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: [-74.5, 40], // starting position [lng, lat]
+      zoom: 9 // starting zoom
     });
     return () => {
       map.remove();
@@ -21,8 +22,10 @@
 
 <style>
   .map {
-    height: 50vh;
-    width: 100vw;
+    width: 500px;
+    height: 500px;
+    margin: 1rem;
+    box-shadow: 0 1px 20px 3px #0000003d;
   }
 </style>
 
