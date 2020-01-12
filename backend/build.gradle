@@ -26,7 +26,10 @@ repositories {
 }
 
 dependencies {
+    compile('org.springframework.boot:spring-boot-starter-websocket')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // Required for Kotlin integration
     compile "org.springframework.boot:spring-boot-starter-web"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0"
+    compile("org.jetbrains.kotlin:kotlin-reflect")
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
