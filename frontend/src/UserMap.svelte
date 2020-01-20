@@ -18,6 +18,10 @@
       map.remove();
     };
   });
+
+  onMount(() => {
+    // Request last status for this ride uid
+  });
 </script>
 
 <style>

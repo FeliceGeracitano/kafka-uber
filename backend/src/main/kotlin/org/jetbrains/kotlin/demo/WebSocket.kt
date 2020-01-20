@@ -1,44 +1,87 @@
 package org.jetbrains.kotlin.demo
 
-import com.fasterxml.jackson.databind.ObjectMapper
+
+import com.beust.klaxon.Klaxon
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.jetbrains.kotlin.demo.kafka.KafkaProducer
+import org.springframework.context.annotation.Configuration
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
+import org.springframework.web.socket.config.annotation.EnableWebSocket
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import java.sql.RowId
 import java.util.concurrent.atomic.AtomicLong
+import java.util.UUID;
 
 
+@Configuration
+@EnableWebSocket
+class WSConfig : WebSocketConfigurer {
+    override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
+        registry.addHandler(WebSocket(), "/ws").setAllowedOrigins("*").withSockJS()
+    }
+}
 
-class WebSocket: TextWebSocketHandler() {
-    val sessionList = HashMap<WebSocketSession, User>()
-    var uids = AtomicLong(0)
+class WebSocket : TextWebSocketHandler() {
+    private val sessionList = mutableSetOf<WebSocketSession>();
+    private var uids = AtomicLong(0)
+    private val kafkaProducer = KafkaProducer();
+
 
     @Throws(Exception::class)
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        sessionList.remove(session);
+        sessionList.remove(session)
     }
 
-    public override fun handleTextMessage(session: WebSocketSession?, message: TextMessage?) {
-        val json = ObjectMapper().readTree(message?.payload)
-        // {type: "join/say", data: "name/msg"}
-        when (json.get("type").asText()) {
-            "join" -> {
-                val user = User(uids.getAndIncrement(), json.get("data").asText())
-                sessionList.put(session!!, user)
-                // tell this user about all other users
-                emit(session, Message("users", sessionList.values))
-                // tell all other users, about this user
-                broadcastToOthers(session, Message("join", user))
+    @Throws(Exception::class)
+    override fun afterConnectionEstablished(session: WebSocketSession) {
+        sessionList.add(session)
+    }
+
+
+
+
+    @Throws(Exception::class)
+    public override fun handleTextMessage(session: WebSocketSession?, textMessage: TextMessage?) {
+        val JSONString = textMessage?.payload.toString()
+        val action = Klaxon().parse<Action>(JSONString)
+        validate(action); // remove nullabile filed for producers
+        when (action?.type) {
+            ActionType.REQUEST_RIDE -> {
+                kafkaProducer.produceRiders(action.payload?.rider)
+                kafkaProducer.produceRides(
+                    Ride(
+                        "R" + UUID.randomUUID().toString(),
+                        null,
+                        action.payload.rider?.id,
+                        action.payload.destination
+                    )
+                )
+
             }
-            "say" -> {
-                broadcast(Message("say", json.get("data").asText()))
+            ActionType.CONFIRM_RIDE -> {
+                kafkaProducer.produceRiders(action.payload?.rider)
+            }
+            ActionType.DRIVER_UPDATE_LOCATION -> {
+//                kafkaProducer.produceRiders(Ride(UUID.randomUUID().toString(), action.payload.driver.id))
+            }
+            else -> {
+                println(action?.type)
             }
         }
     }
 
-    fun emit(session: WebSocketSession, msg: Message) = session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
-    fun broadcast(msg: Message) = sessionList.forEach { emit(it.key, msg) }
-    fun broadcastToOthers(me: WebSocketSession, msg: Message) = sessionList.filterNot { it.key == me }.forEach { emit(it.key, msg) }
+    private fun emit(session: WebSocketSession, msg: Action) =
+        session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
+//    fun broadcast(msg: Message) = sessionList.forEach { emit(it.key, msg) }
+//    fun broadcastToOthers(me: WebSocketSession, msg: Message) =
+//        sessionList.filterNot { it.key == me }.forEach { emit(it.key, msg) }
+
+    private fun validate(action: Action?) {
+        // TODO: validate actions fields.
+    }
 }
 

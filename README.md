@@ -2,6 +2,12 @@
 
 Kafka Uber Demo App
 
+### installation
+
+```
+git clone --recurse-submodules https://github.com/FeliceGeracitano/kafka-uber.git
+```
+
 ### frontend
 
 - svelte
@@ -25,5 +31,11 @@ brew install helm
 - deploy cluster
 
 ```bash
-helm install my-confluent cp-helm-charts -f ./values.yaml
+helm install kuber cp-helm-charts -f ./values.yaml helm install --namespace kuber
+```
+
+- destroy cluster
+
+```bash
+helm unistall kuber --namespace kuber ?
 ```

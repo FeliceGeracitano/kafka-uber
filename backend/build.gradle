@@ -31,5 +31,10 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0"
     compile("org.jetbrains.kotlin:kotlin-reflect")
+
+    // Kafka
+    compile 'org.apache.kafka:kafka-clients:2.4.0'
+
+    implementation 'com.beust:klaxon:5.0.1'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }

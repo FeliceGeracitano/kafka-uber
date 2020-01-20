@@ -1,13 +1,25 @@
 <script>
-  import UserMap from "./UserMap.svelte";
+  import Rider from "./Rider/Rider.svelte";
   import DriverMap from "./DriverMap.svelte";
   import { onMount } from "svelte";
 
-  var webSocket = new WebSocket("ws://localhost:8080/ws/websocket");
+  // var webSocket = new WebSocket("ws://localhost:8080/ws/websocket");
+
   webSocket.onopen = function() {
     console.log("connection established");
-    webSocket.send(JSON.stringify({ type: "say", data: "data" }));
+    debugger;
+    webSocket.send(
+      JSON.stringify({
+        type: "REQUEST_RIDE",
+        payload: {
+          driver: null,
+          rider: { id: "", location: { lat: 0, lng: 0 }, status: "REQUESTING" },
+          destination: { lat: 0, lng: 0 }
+        }
+      })
+    );
   };
+
   webSocket.onclose = function() {
     console.log("connection closed");
   };
@@ -40,6 +52,6 @@
 </style>
 
 <div class="container" on:click={handleClick}>
-  <UserMap />
   <DriverMap />
+  <Rider />
 </div>

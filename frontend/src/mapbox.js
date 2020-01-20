@@ -4,7 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 mapbox.accessToken =
   "pk.eyJ1IjoiZmVsaWNlZ2VyYWNpdGFubyIsImEiOiJjanhtMDJpMWYwMno2M29vNDJmbDZoZ2NjIn0.wi38HXu-VVmUkJkkqs3zVA";
 
-const DriverMapKey = {};
-const UserMapKey = {};
+const DriverMapKey = "DriverMapKey";
+const RiderMapKey = "RiderMapKey";
 
-export {mapbox, DriverMapKey, UserMapKey};
+export { mapbox, DriverMapKey, RiderMapKey };
