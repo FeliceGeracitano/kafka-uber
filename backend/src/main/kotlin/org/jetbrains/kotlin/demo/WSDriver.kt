@@ -5,6 +5,7 @@ import com.beust.klaxon.Klaxon
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.jetbrains.kotlin.demo.kafka.KafkaProducer
 import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Controller
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
@@ -21,14 +22,16 @@ import java.util.UUID;
 @EnableWebSocket
 class WSConfig : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(WebSocket(), "/ws").setAllowedOrigins("*").withSockJS()
+        registry.addHandler(WSDriver(), "/ws-driver").setAllowedOrigins("*").withSockJS()
     }
 }
 
-class WebSocket : TextWebSocketHandler() {
+
+@Controller
+class WSDriver : TextWebSocketHandler() {
     private val sessionList = mutableSetOf<WebSocketSession>();
     private var uids = AtomicLong(0)
-    private val kafkaProducer = KafkaProducer();
+    // private val kafkaProducer = KafkaProducer();
 
 
     @Throws(Exception::class)
@@ -51,19 +54,19 @@ class WebSocket : TextWebSocketHandler() {
         validate(action); // remove nullabile filed for producers
         when (action?.type) {
             ActionType.REQUEST_RIDE -> {
-                kafkaProducer.produceRiders(action.payload?.rider)
-                kafkaProducer.produceRides(
-                    Ride(
-                        "R" + UUID.randomUUID().toString(),
-                        null,
-                        action.payload.rider?.id,
-                        action.payload.destination
-                    )
-                )
+                // kafkaProducer.produceRiders(action.payload?.rider)
+//                kafkaProducer.produceRides(
+//                    Ride(
+//                        "R" + UUID.randomUUID().toString(),
+//                        null,
+//                        action.payload.rider?.id,
+//                        action.payload.destination
+//                    )
+//                )
 
             }
             ActionType.CONFIRM_RIDE -> {
-                kafkaProducer.produceRiders(action.payload?.rider)
+//                kafkaProducer.produceRiders(action.payload?.rider)
             }
             ActionType.DRIVER_UPDATE_LOCATION -> {
 //                kafkaProducer.produceRiders(Ride(UUID.randomUUID().toString(), action.payload.driver.id))

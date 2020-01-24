@@ -1,8 +1,11 @@
 <script>
   import Map from "./Map.svelte";
   import Marker from "./Marker.svelte";
+  import { getUid } from "../utils.js";
 
-  const webSocket = new WebSocket("ws://localhost:8080/ws/websocket");
+  const webSocket = new WebSocket(
+    `ws://localhost:8080/ws-rider/websocket?riderUid=${getUid("RIDER")}`
+  );
   const riderId = getUid("RIDER");
 
   webSocket.onopen = function() {
