@@ -1,31 +1,38 @@
 package org.jetbrains.kotlin.demo
 
-enum class ActionType {
+
+enum class ClientActions {
+    // Rider
     REQUEST_RIDE,
+
+    // Driver
     CONFIRM_RIDE,
-    DRIVER_UPDATE_LOCATION,
+    UPDATE_DRIVER_LOCATION,
     START_RIDE,
     END_RIDE
 }
-enum class UserStatus {
-    INACTIVE,
-    ACTIVE,
-    AVAILABLE,
+
+
+enum class TripStatus {
     REQUESTING,
-    BUSY
+    STARTED,
+    ENDED
 }
-enum class RideStatus {
-    ENDED,
-    CANCELLED,
-    ACTIVE
+
+enum class UserType {
+    DRIVER,
+    RIDER
 }
+
 
 data class Location(val lat: Double, val lng: Double)
+data class User(val id: String, val location: Location?, val type: UserType)
+data class Trip(
+    val id: String,
+    val status: TripStatus,
+    val driverId: String?,
+    val riderId: String?,
+    val destination: Location
+)
 
-class User(val id: String, val location: Location?, val status: UserStatus)
-
-data class Action(val type: ActionType, val payload: ActionPayload)
-
-data class ActionPayload(val driver: User?, val rider: User?, val destination: Location?)
-
-data class Ride(val id: String, val driverId: String?,  val riderId: String?, val destination: Location?)
+data class Action(val type: ClientActions, val payload: String?)

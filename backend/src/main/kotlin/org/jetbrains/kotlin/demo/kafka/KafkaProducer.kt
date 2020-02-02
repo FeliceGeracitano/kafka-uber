@@ -32,7 +32,7 @@ class KafkaProducer() {
         produce(ridersTopic, Klaxon().toJsonString(rider))
     }
 
-    fun produceRides(ride: Ride?) {
+    fun produceRides(ride: Trip?) {
         produce(ridesTopic, Klaxon().toJsonString(ride))
     }
 }

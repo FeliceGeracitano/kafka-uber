@@ -39,3 +39,30 @@ helm install kuber cp-helm-charts -f ./values.yaml helm install --namespace kube
 ```bash
 helm unistall kuber --namespace kuber ?
 ```
+
+## kafka topic
+
+### trip
+
+| key      | value                                                                              |
+| -------- | ---------------------------------------------------------------------------------- |
+| `tripId` | {"STATUS": "", "riderId": String,"driverId": String, from: Location, to: Location} |
+
+### rider
+
+| key       | value                                    |
+| --------- | ---------------------------------------- |
+| `riderId` | {"location": Location, currentTripId:""} |
+
+### driver
+
+| key        | value                                    |
+| ---------- | ---------------------------------------- |
+| `driverId` | {"location": Location, currentTripId:""} |
+
+## TRIP STATUSES
+
+- REQEUSTING
+- CONFIRMED
+- STARTED
+- ENDED
