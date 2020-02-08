@@ -21,18 +21,22 @@ class KafkaProducer() {
         return KafkaProducer<String, String>(props)
     }
 
-    private fun produce(topic: String, record: String) {
-        println("Sending record... $record")
-        val futureResult = producer.send(ProducerRecord(topic, record))
+    private fun produce(topic: String, key: String, value: String) {
+        println("Sending record... $value")
+        val futureResult = producer.send(ProducerRecord(topic, key, value))
         futureResult.get()
         println("Record sent.")
     }
 
-    fun produceRiders(rider: User?) {
-        produce(ridersTopic, Klaxon().toJsonString(rider))
+    fun produceTrip(trip: Trip) {
+        produce(tripTopic, trip.id,  Klaxon().toJsonString(trip))
     }
 
-    fun produceRides(ride: Trip?) {
-        produce(ridesTopic, Klaxon().toJsonString(ride))
+    fun produceRiders(rider: User) {
+        produce(ridersTopic, rider.id,  Klaxon().toJsonString(rider))
+    }
+
+    fun produceDriver(driver: User) {
+        produce(driversTopic, driver.id,  Klaxon().toJsonString(driver))
     }
 }

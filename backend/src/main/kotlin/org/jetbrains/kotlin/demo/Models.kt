@@ -15,6 +15,7 @@ enum class ClientActions {
 
 enum class TripStatus {
     REQUESTING,
+    CONFIRMED,
     STARTED,
     ENDED
 }
@@ -26,7 +27,7 @@ enum class UserType {
 
 
 data class Location(val lat: Double, val lng: Double)
-data class User(val id: String, val location: Location?, val type: UserType)
+data class User(val id: String, val location: Location?, val type: UserType, val lastTripId: String?)
 data class Trip(
     val id: String,
     val status: TripStatus,
@@ -36,3 +37,5 @@ data class Trip(
 )
 
 data class Action(val type: ClientActions, val payload: String?)
+data class ConfirmRidePayload(val tripId: String, val driverLocation: Location)
+data class RequestRidePayload(val destination: Location, val riderLocation: Location)

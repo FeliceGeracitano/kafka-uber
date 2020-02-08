@@ -1,7 +1,10 @@
-package org.jetbrains.kotlin.demo
+package org.jetbrains.kotlin.demo.ws
+
 
 import com.beust.klaxon.Klaxon
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.jetbrains.kotlin.demo.*
+import org.jetbrains.kotlin.demo.controllers.DriverController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Controller
@@ -17,19 +20,19 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 
 @Configuration
 @EnableWebSocket
-class WSRiderConfig : WebSocketConfigurer {
+class WSDriverConfig : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(WSRider(), "/ws-rider").setAllowedOrigins("*").withSockJS()
+        registry.addHandler(WSRider(), "/ws-driver").setAllowedOrigins("*").withSockJS()
     }
 }
 
 
 @Controller
-class WSRider: TextWebSocketHandler () {
+class WSDriver : TextWebSocketHandler() {
     private val sessionList = mutableMapOf<String, WebSocketSession>();
     private val jsonParser = Klaxon()
     @Autowired
-    private lateinit var riderController: RiderController
+    private lateinit var driverController: DriverController
 
     @Throws(Exception::class)
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
@@ -39,29 +42,42 @@ class WSRider: TextWebSocketHandler () {
     @Throws(Exception::class)
     override fun afterConnectionEstablished(session: WebSocketSession) {
         val parameters = parseURlQuery(session.uri.query)
-        val riderUid = parameters["riderUid"] ?: "";
-        if (riderUid == "") return session.close()
-        session.attributes["riderUid"] = riderUid;
-        sessionList[riderUid] = session;
-        // Get last status for riderUid
+        val driverUid = parameters["driverId"] ?: "";
+        if (driverUid == "") return session.close(CloseStatus(404))
+        session.attributes["driverId"] = driverUid;
+        sessionList[driverUid] = session;
+        // Get last status for driverUid
     }
 
 
     @Throws(Exception::class)
     public override fun handleTextMessage(session: WebSocketSession?, textMessage: TextMessage?) {
-        println(session?.attributes?.get("riderUid"))
+        println(session?.attributes?.get("driverId"))
         val jsonString = textMessage?.payload.toString()
-        val action = jsonParser.parse<Action>(jsonString)
+        val action = jsonParser.parse<Action>(jsonString) as Action
+        val driverId = session?.attributes?.get("driverId") as String
+        if (action.payload == null) throw Error("Missing Location Payload")
+
         when (action?.type) {
-            ClientActions.REQUEST_RIDE -> riderController.requestRide()
+            ClientActions.CONFIRM_RIDE -> {
+                val payload = jsonParser.parse<ConfirmRidePayload>(action.payload) as ConfirmRidePayload
+                driverController.confirmTrip(driverId, payload.tripId,  payload.driverLocation)
+            }
+            ClientActions.UPDATE_DRIVER_LOCATION -> {
+                val location = jsonParser.parse<Location>(action.payload) as Location
+                driverController.updateLocation(driverId, location)
+            }
+            ClientActions.START_RIDE -> {
+                driverController.startTrip(driverId)
+            }
+            ClientActions.END_RIDE -> {
+                // write in "trip" topic ["tripId", status: ENDED}]
+            }
         }
     }
 
     private fun emit(session: WebSocketSession, msg: Action) =
         session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
-//    fun broadcast(msg: Message) = sessionList.forEach { emit(it.key, msg) }
-//    fun broadcastToOthers(me: WebSocketSession, msg: Message) =
-//        sessionList.filterNot { it.key == me }.forEach { emit(it.key, msg) }
 
     private fun validate(action: Action?) {
         // TODO: validate actions fields.
