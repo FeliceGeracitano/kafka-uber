@@ -14,15 +14,15 @@ class DriverController {
     private lateinit var kafkaConsumer: KafkaConsumer
 
     fun confirmTrip(driverId: String, tripId: String, driverLocation: Location) {
-        updateLocation(driverId, driverLocation, null)
+        updateLocation(driverId, driverLocation, tripId)
         // GET From topic and update
         val trip = Trip("", TripStatus.CONFIRMED, "", "", Location(0.0, 0.0))
         kafkaProducer.produceTrip(trip);
     }
 
-    fun updateLocation(driverId: String, location: Location, newTripId: String?) {
+    fun updateLocation(driverId: String, location: Location, lastTripId: String?) {
         // GET From topic and update
-        val driver = User("", location, UserType.DRIVER, newTripId)
+        val driver = User("", location, UserType.DRIVER, "")
         kafkaProducer.produceDriver(driver)
     }
 

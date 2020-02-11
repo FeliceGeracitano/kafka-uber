@@ -71,7 +71,6 @@ class WSDriver : TextWebSocketHandler() {
                 driverController.startTrip(driverId)
             }
             ClientActions.END_RIDE -> {
-                // write in "trip" topic ["tripId", status: ENDED}]
             }
         }
     }
@@ -80,6 +79,8 @@ class WSDriver : TextWebSocketHandler() {
         session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
 
     private fun validate(action: Action?) {
+
+
         // TODO: validate actions fields.
     }
 }
