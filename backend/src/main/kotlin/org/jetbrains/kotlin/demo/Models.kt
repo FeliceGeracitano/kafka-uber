@@ -9,7 +9,13 @@ enum class ClientActions {
     CONFIRM_RIDE,
     UPDATE_DRIVER_LOCATION,
     START_RIDE,
-    END_RIDE
+    END_RIDE,
+
+
+
+    //
+    A,
+    B
 }
 
 

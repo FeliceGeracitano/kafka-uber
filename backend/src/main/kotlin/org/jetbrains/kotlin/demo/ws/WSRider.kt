@@ -31,7 +31,7 @@ class WSRider: TextWebSocketHandler () {
     private val sessionList = mutableMapOf<String, WebSocketSession>();
     private val jsonParser = Klaxon()
     @Autowired
-    private lateinit var riderController: RiderController
+    private var riderController = RiderController()
 
 
     @Throws(Exception::class)
@@ -42,13 +42,15 @@ class WSRider: TextWebSocketHandler () {
     @Throws(Exception::class)
     override fun afterConnectionEstablished(session: WebSocketSession) {
         val parameters = parseURlQuery(session.uri.query)
-        val riderUid = parameters["riderId"] ?: "";
-        if (riderUid == "") return session.close()
-        session.attributes["riderId"] = riderUid;
-            sessionList[riderUid] = session;
+        val riderId = parameters["riderId"] ?: "";
+        if (riderId == "") return session.close()
+        session.attributes["riderId"] = riderId;
+            sessionList[riderId] = session;
         // Get last status for riderUid
-        session.sendMessage(TextMessage("sync for...${riderUid}: "))
+        session.sendMessage(TextMessage("sync for...${riderId}: "))
+        riderController.getLastRiderState(riderId)
     }
+
 
 
     @Throws(Exception::class)
@@ -61,8 +63,16 @@ class WSRider: TextWebSocketHandler () {
 
         when (action?.type) {
             ClientActions.REQUEST_RIDE -> {
+                riderController.getLastRiderState(riderId)
                 val payload = jsonParser.parse<RequestRidePayload>(action.payload) as RequestRidePayload
                 riderController.requestRide(riderId, payload.riderLocation, payload.destination)
+            }
+
+            ClientActions.A -> {
+                riderController.getLastRiderState(riderId)
+            }
+            ClientActions.B -> {
+                riderController.produce(riderId)
             }
         }
     }

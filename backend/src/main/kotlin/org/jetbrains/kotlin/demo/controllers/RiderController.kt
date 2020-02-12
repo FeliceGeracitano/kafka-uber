@@ -12,10 +12,10 @@ import java.util.*
 class RiderController {
 
     @Autowired
-    private lateinit var kafkaProducer: KafkaProducer
+    private var kafkaProducer = KafkaProducer()
 
     @Autowired
-    private lateinit var kafkaConsumer: KafkaConsumer
+    private var kafkaConsumer = KafkaConsumer()
 
     fun requestRide(riderId: String, riderLocation: Location, destination: Location) {
         val uuid: UUID = UUID.randomUUID()
@@ -26,4 +26,15 @@ class RiderController {
         val rider = User(riderId, riderLocation, UserType.RIDER, tripUUID)
         kafkaProducer.produceRiders(rider)
     }
+
+
+
+    fun getLastRiderState(key: String) {
+        kafkaConsumer.getLastDriver(key)
+    }
+
+    fun produce(key: String) {
+        kafkaProducer.produceRiders(User(key, null, UserType.RIDER, null))
+    }
+
 }

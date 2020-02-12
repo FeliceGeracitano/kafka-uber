@@ -1,34 +1,30 @@
 package org.jetbrains.kotlin.demo.kafka
 
-import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.Serdes
-import org.apache.kafka.common.serialization.StringDeserializer
-import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
-import org.apache.kafka.streams.kstream.Consumed
-import org.apache.kafka.streams.kstream.KGroupedStream
-import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Materialized
-import org.apache.kafka.streams.state.KeyValueStore
-import org.jetbrains.kotlin.demo.*
+import org.apache.kafka.streams.state.QueryableStoreTypes
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore
+import org.apache.kafka.streams.state.Stores.inMemoryKeyValueStore
+import org.jetbrains.kotlin.demo.kafkaBroker
+import org.jetbrains.kotlin.demo.ridersTopic
 import org.springframework.stereotype.Service
 import java.util.*
-import javax.annotation.PostConstruct
+
 
 @Service
 class KafkaConsumer() {
 
-    private val driverStreams = buildRiderStream()
+    private val driverStreams: KafkaStreams = buildRiderStream()
 
 
-    private fun buildRiderStream(): Any {
+    private fun buildRiderStream(): KafkaStreams {
         val streamsBuilder = StreamsBuilder()
 
 
-        val riderJsonStream = streamsBuilder
+/*        val riderJsonStream = streamsBuilder
                 .stream(ridersTopic, Consumed.with(Serdes.String(), Serdes.String()))
                 .through("test")
 
@@ -36,11 +32,16 @@ class KafkaConsumer() {
             val rider = jsonMapper.readValue(v, User::class.java)
             print(rider);
             rider
-        }
+        }*/
 
-        riderStream.groupBy { key, _ -> key, Grouped  }
+        val stateStore = inMemoryKeyValueStore("key-value-store")
 
-
+        streamsBuilder.table(
+                ridersTopic,
+                Materialized.`as`<String, String>(stateStore)
+                        .withKeySerde(Serdes.String())
+                        .withValueSerde(Serdes.String())
+        )
 
 
         val props = Properties()
@@ -70,5 +71,16 @@ class KafkaConsumer() {
         //  streams.start()
         // return streams
         // GlobalAppState.instance.streams(streams)
+    }
+
+
+
+
+
+    fun getLastDriver(key:String) {
+        val metadata = driverStreams.metadataForKey("keyvaluestore", key,Serdes.String().serializer())
+        print(metadata)
+        val store: ReadOnlyKeyValueStore<String, String> = driverStreams.store("keyvaluestore",  QueryableStoreTypes.keyValueStore())
+        val value = store.get(key);
     }
 }
