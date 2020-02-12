@@ -65,7 +65,7 @@ class WSDriver : TextWebSocketHandler() {
             }
             ClientActions.UPDATE_DRIVER_LOCATION -> {
                 val location = jsonParser.parse<Location>(action.payload) as Location
-                driverController.updateLocation(driverId, location)
+                driverController.updateLocation(driverId, location, null)
             }
             ClientActions.START_RIDE -> {
                 driverController.startTrip(driverId)

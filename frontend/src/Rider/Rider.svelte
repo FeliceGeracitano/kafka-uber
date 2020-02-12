@@ -4,19 +4,21 @@
   import { getUid } from "../utils.js";
 
   const webSocket = new WebSocket(
-    `ws://localhost:8080/ws-rider/websocket?riderUid=${getUid("RIDER")}`
+    `ws://localhost:8080/ws-rider/websocket?riderId=${getUid("RIDER")}`
   );
   const riderId = getUid("RIDER");
 
   webSocket.onopen = function() {
-    webSocket.send(
-      JSON.stringify({ type: "RIDER_SYNC", payload: { riderId: riderId } })
-    );
+    debugger;
+    // webSocket.send(
+    //   JSON.stringify({ type: "RIDER_SYNC", payload: { riderId: riderId } })
+    // );
   };
 
   webSocket.onmessage = message => {
+    debugger;
     switch (message) {
-      case messate.type === "RIDE_UDPATE":
+      case message.type === "RIDE_UDPATE":
         break;
       default:
         break;

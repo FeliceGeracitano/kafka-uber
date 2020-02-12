@@ -22,6 +22,6 @@
 </style>
 
 <div class="container" on:click={handleClick}>
-  <DriverMap />
+  <!-- <DriverMap /> -->
   <Rider />
 </div>

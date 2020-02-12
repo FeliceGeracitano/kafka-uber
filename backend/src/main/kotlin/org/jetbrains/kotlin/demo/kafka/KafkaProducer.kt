@@ -6,12 +6,21 @@ import org.apache.kafka.clients.producer.Producer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.jetbrains.kotlin.demo.*
+import org.springframework.stereotype.Service
 import java.util.*
+import javax.annotation.PostConstruct
 
-
+@Service
 class KafkaProducer() {
 
     private val producer = createProducer()
+
+
+
+    @PostConstruct
+    fun init() {
+        print("KafkaProducer init")
+    }
 
     private fun createProducer(): Producer<String, String> {
         val props = Properties()

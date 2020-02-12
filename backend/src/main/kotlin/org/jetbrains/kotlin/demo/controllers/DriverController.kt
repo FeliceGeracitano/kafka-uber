@@ -11,7 +11,6 @@ class DriverController {
 
     @Autowired
     private lateinit var kafkaProducer: KafkaProducer
-    private lateinit var kafkaConsumer: KafkaConsumer
 
     fun confirmTrip(driverId: String, tripId: String, driverLocation: Location) {
         updateLocation(driverId, driverLocation, tripId)

@@ -33,6 +33,7 @@ class WSRider: TextWebSocketHandler () {
     @Autowired
     private lateinit var riderController: RiderController
 
+
     @Throws(Exception::class)
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         sessionList.remove(session.id)
@@ -44,8 +45,9 @@ class WSRider: TextWebSocketHandler () {
         val riderUid = parameters["riderId"] ?: "";
         if (riderUid == "") return session.close()
         session.attributes["riderId"] = riderUid;
-        sessionList[riderUid] = session;
+            sessionList[riderUid] = session;
         // Get last status for riderUid
+        session.sendMessage(TextMessage("sync for...${riderUid}: "))
     }
 
 

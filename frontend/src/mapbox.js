@@ -6,5 +6,6 @@ mapbox.accessToken =
 
 const DriverMapKey = "DriverMapKey";
 const RiderMapKey = "RiderMapKey";
+const UserMapKey = "UserMapKey";
 
-export { mapbox, DriverMapKey, RiderMapKey };
+export {mapbox, DriverMapKey, RiderMapKey};

@@ -1,6 +1,7 @@
 package org.jetbrains.kotlin.demo.controllers
 
 import org.jetbrains.kotlin.demo.*
+import org.jetbrains.kotlin.demo.kafka.KafkaConsumer
 import org.jetbrains.kotlin.demo.kafka.KafkaProducer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -12,6 +13,9 @@ class RiderController {
 
     @Autowired
     private lateinit var kafkaProducer: KafkaProducer
+
+    @Autowired
+    private lateinit var kafkaConsumer: KafkaConsumer
 
     fun requestRide(riderId: String, riderLocation: Location, destination: Location) {
         val uuid: UUID = UUID.randomUUID()
