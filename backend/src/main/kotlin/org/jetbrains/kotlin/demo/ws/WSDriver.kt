@@ -21,8 +21,12 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 @Configuration
 @EnableWebSocket
 class WSDriverConfig : WebSocketConfigurer {
+
+    @Autowired
+    private val myWebSocketHandler: WSDriver? = null
+
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(WSRider(), "/ws-driver").setAllowedOrigins("*").withSockJS()
+        registry.addHandler(myWebSocketHandler, "/ws-driver").setAllowedOrigins("*").withSockJS()
     }
 }
 
@@ -31,6 +35,7 @@ class WSDriverConfig : WebSocketConfigurer {
 class WSDriver : TextWebSocketHandler() {
     private val sessionList = mutableMapOf<String, WebSocketSession>();
     private val jsonParser = Klaxon()
+
     @Autowired
     private lateinit var driverController: DriverController
 
@@ -59,28 +64,28 @@ class WSDriver : TextWebSocketHandler() {
         if (action.payload == null) throw Error("Missing Location Payload")
 
         when (action?.type) {
-            ClientActions.CONFIRM_RIDE -> {
+            ACTION_TYPE.CONFIRM_RIDE -> {
                 val payload = jsonParser.parse<ConfirmRidePayload>(action.payload) as ConfirmRidePayload
                 driverController.confirmTrip(driverId, payload.tripId,  payload.driverLocation)
             }
-            ClientActions.UPDATE_DRIVER_LOCATION -> {
+            ACTION_TYPE.UPDATE_DRIVER_LOCATION -> {
                 val location = jsonParser.parse<Location>(action.payload) as Location
-                driverController.updateLocation(driverId, location, null)
+                driverController.updateLocation(driverId, location)
             }
-            ClientActions.START_RIDE -> {
-                driverController.startTrip(driverId)
-            }
-            ClientActions.END_RIDE -> {
-            }
+            ACTION_TYPE.START_RIDE -> driverController.startTrip(driverId)
+            ACTION_TYPE.END_RIDE -> driverController.endTrip(driverId)
         }
     }
 
     private fun emit(session: WebSocketSession, msg: Action) =
         session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
 
-    private fun validate(action: Action?) {
 
 
-        // TODO: validate actions fields.
+    fun sendMessage(driverId: String, msg: String) {
+        val session = sessionList[driverId]
+        if (session === null) return
+        session.sendMessage(TextMessage(msg))
+
     }
 }

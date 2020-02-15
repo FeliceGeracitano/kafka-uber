@@ -1,11 +1,7 @@
 <script>
-  import Rider from "./Rider/Rider.svelte";
-  import DriverMap from "./DriverMap.svelte";
+  import Rider from "./components/rider/rider.svelte";
+  import Driver from "./components/driver/driver.svelte";
   import { onMount } from "svelte";
-
-  function handleClick() {
-    webSocket.send(JSON.stringify({ type: "say", data: "data" }));
-  }
 </script>
 
 <style>
@@ -21,7 +17,7 @@
   }
 </style>
 
-<div class="container" on:click={handleClick}>
-  <!-- <DriverMap /> -->
+<div class="container">
   <Rider />
+  <Driver />
 </div>

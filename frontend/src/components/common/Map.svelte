@@ -1,21 +1,21 @@
 <script>
   import { onMount, setContext } from "svelte";
-  import { mapbox, RiderMapKey } from "../mapbox.js";
-
-  setContext(RiderMapKey, { getMap: () => map });
-
+  import { mapbox, mapContextKey } from "../../mapbox.js";
   export let lat;
   export let lon;
   export let zoom;
+
+  setContext(mapContextKey, { getMap: () => map });
 
   let container;
   let map;
 
   onMount(() => {
+    const center = lon && lat ? [lon, lat] : undefined;
     map = new mapbox.Map({
       container,
       style: "mapbox://styles/mapbox/streets-v9",
-      center: [lon, lat],
+      center,
       zoom
     });
     return () => {

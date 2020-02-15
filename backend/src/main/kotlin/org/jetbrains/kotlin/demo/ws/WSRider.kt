@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.demo.*
 import org.jetbrains.kotlin.demo.controllers.RiderController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
-import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Component
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
@@ -16,22 +16,27 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 
 
-
 @Configuration
 @EnableWebSocket
 class WSRiderConfig : WebSocketConfigurer {
+
+    @Autowired
+    private val myWebSocketHandler: WSRider? = null
+
+    @Override
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(WSRider(), "/ws-rider").setAllowedOrigins("*").withSockJS()
+        registry.addHandler(myWebSocketHandler, "/ws-rider").setAllowedOrigins("*").withSockJS()
     }
 }
 
 
-@Controller
-class WSRider: TextWebSocketHandler () {
+@Component
+class WSRider : TextWebSocketHandler() {
     private val sessionList = mutableMapOf<String, WebSocketSession>();
     private val jsonParser = Klaxon()
+
     @Autowired
-    private var riderController = RiderController()
+    private lateinit var riderController: RiderController
 
 
     @Throws(Exception::class)
@@ -45,12 +50,14 @@ class WSRider: TextWebSocketHandler () {
         val riderId = parameters["riderId"] ?: "";
         if (riderId == "") return session.close()
         session.attributes["riderId"] = riderId;
-            sessionList[riderId] = session;
-        // Get last status for riderUid
-        session.sendMessage(TextMessage("sync for...${riderId}: "))
-        riderController.getLastRiderState(riderId)
+        sessionList[riderId] = session;
+        val trip = riderController.getLastTripStatus(riderId);
+        val payload = if (trip !== null) jacksonObjectMapper().writeValueAsString(trip) else null
+        val messageString = jacksonObjectMapper().writeValueAsString(
+            Action(ACTION_TYPE.SYNC_STATUS, payload)
+        )
+        session.sendMessage(TextMessage(messageString))
     }
-
 
 
     @Throws(Exception::class)
@@ -61,20 +68,13 @@ class WSRider: TextWebSocketHandler () {
         val action = jsonParser.parse<Action>(jsonString) as Action
         if (action.payload == null) throw Error("Missing Location Payload")
 
-        when (action?.type) {
-            ClientActions.REQUEST_RIDE -> {
-                riderController.getLastRiderState(riderId)
-                val payload = jsonParser.parse<RequestRidePayload>(action.payload) as RequestRidePayload
-                riderController.requestRide(riderId, payload.riderLocation, payload.destination)
-            }
-
-            ClientActions.A -> {
-                riderController.getLastRiderState(riderId)
-            }
-            ClientActions.B -> {
-                riderController.produce(riderId)
+            when (action?.type) {
+                ACTION_TYPE.REQUEST_TRIP -> {
+                val (destination, riderLocation) = jsonParser.parse<RequestRidePayload>(action.payload) as RequestRidePayload
+                riderController.handleRequestRide(riderId, destination, riderLocation);
             }
         }
+
     }
 
     private fun emit(session: WebSocketSession, msg: Action) =
@@ -83,7 +83,9 @@ class WSRider: TextWebSocketHandler () {
 //    fun broadcastToOthers(me: WebSocketSession, msg: Message) =
 //        sessionList.filterNot { it.key == me }.forEach { emit(it.key, msg) }
 
-    private fun validate(action: Action?) {
-        // TODO: validate actions fields.
+    public fun sendMessageToRider(riderId: String, msg: String) {
+        val session = sessionList[riderId]
+        session?.sendMessage(TextMessage(msg))
     }
+
 }

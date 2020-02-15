@@ -8,10 +8,7 @@ function uuidv4() {
 }
 
 // key = 'DRIVER' | 'RIDER'
-export const getUid = (key = "") => {
-  const UidFromStorage = localStorage.getItem(key);
-  if (UidFromStorage) return UidFromStorage;
-  const uuid = `D${uuidv4()}`;
-  localStorage.setItem(key, uuid);
-  return uuid;
+export const getUid = (key: "DRIVER" | "RIDER") => {
+  if (!localStorage.getItem("UID")) localStorage.setItem("UID", uuidv4());
+  return `${key.charAt(0)}${localStorage.getItem("UID")}`;
 };

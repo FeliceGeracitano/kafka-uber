@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service
 import java.util.*
 import javax.annotation.PostConstruct
 
-@Service
 class KafkaProducer() {
 
     private val producer = createProducer()

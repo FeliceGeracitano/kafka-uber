@@ -1,44 +1,29 @@
 package org.jetbrains.kotlin.demo.controllers
 import org.jetbrains.kotlin.demo.*
-import org.jetbrains.kotlin.demo.kafka.KafkaConsumer
-import org.jetbrains.kotlin.demo.kafka.KafkaProducer
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
 
-@Component
+@Service
 class DriverController {
 
-    @Autowired
-    private lateinit var kafkaProducer: KafkaProducer
 
     fun confirmTrip(driverId: String, tripId: String, driverLocation: Location) {
-        updateLocation(driverId, driverLocation, tripId)
-        // GET From topic and update
-        val trip = Trip("", TripStatus.CONFIRMED, "", "", Location(0.0, 0.0))
-        kafkaProducer.produceTrip(trip);
+        updateLocation(driverId, driverLocation)
+        GlobalAppState.instance.trip[tripId]?.status = TripStatus.CONFIRMED;
+
     }
 
-    fun updateLocation(driverId: String, location: Location, lastTripId: String?) {
-        // GET From topic and update
-        val driver = User("", location, UserType.DRIVER, "")
-        kafkaProducer.produceDriver(driver)
+    fun updateLocation(driverId: String, location: Location) {
+        GlobalAppState.instance.users[driverId]?.location = location
     }
 
     fun startTrip(driverId: String) {
-        // getTrip from driver
-        val driver = User("", null, UserType.DRIVER, null)
-        // getTrip driver.lastTripId
-        val trip = Trip("", TripStatus.STARTED, "", "", Location(0.0, 0.0))
-        kafkaProducer.produceTrip(trip);
+        val driver = GlobalAppState.instance.users[driverId]
+        GlobalAppState.instance.trip[driver?.lastTripId]?.status = TripStatus.STARTED
     }
 
     fun endTrip(driverId: String) {
-        // getDriver("driverId")
-        val driver = User("", null, UserType.DRIVER, null)
-        // getTrip("driverId")
-        val trip = Trip("", TripStatus.ENDED, "", "", Location(0.0, 0.0))
-        // getTrip driver.lastTripId
-        kafkaProducer.produceTrip(trip);
+        val driver = GlobalAppState.instance.users[driverId]
+        GlobalAppState.instance.trip[driver?.lastTripId]?.status = TripStatus.ENDED
     }
 }

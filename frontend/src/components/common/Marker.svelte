@@ -1,10 +1,11 @@
 <script>
   import { getContext } from "svelte";
-  import { mapbox, RiderMapKey } from "../mapbox.js";
-  const { getMap } = getContext(RiderMapKey);
-  const map = getMap();
+  import { mapbox, mapContextKey } from "../../mapbox.js";
   export let lat;
   export let lon;
+
+  const { getMap } = getContext(mapContextKey);
+  const map = getMap();
   const popup = new mapbox.Popup({ offset: 25 });
   const marker = new mapbox.Marker()
     .setLngLat([lon, lat])

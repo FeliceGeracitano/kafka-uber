@@ -1,21 +1,11 @@
-package org.jetbrains.kotlin.demo.kafka
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.state.HostInfo
+import org.jetbrains.kotlin.demo.*
 
 
 class GlobalAppState private constructor() {
-    var hostPortInfo: HostInfo? = null
-    var kafkaStreams: KafkaStreams? = null
-
-    fun hostPortInfo(host: String?, port: String): GlobalAppState {
-        hostPortInfo = HostInfo(host, port.toInt())
-        return this
-    }
-
-    fun streams(ks: KafkaStreams?): GlobalAppState {
-        kafkaStreams = ks
-        return this
-    }
+    val users = mutableMapOf<String, User>()
+    val trip = mutableMapOf<String, Trip>()
 
     companion object {
         val instance = GlobalAppState()
