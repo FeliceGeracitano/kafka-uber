@@ -4,10 +4,9 @@
   import Actions, { ACTION_TYPE } from "../../actions.ts";
   import Marker from "../common/Marker.svelte";
   import { getUid } from "../../utils.ts";
+  import CenterView from "../common/CenterView.svelte";
 
-  // Molino Dorino
-  const lon = 8.9936027;
-  const lat = 45.4732452;
+  const location = { lon: -74.5, lat: 40.2 };
 
   onMount(async () => {
     const driverId = getUid("DRIVER");
@@ -15,9 +14,12 @@
       `ws://localhost:8080/ws-driver/websocket?driverId=${driverId}`
     );
     webSocket.onmessage = message => {
+      debugger;
       const data = JSON.parse(message.data);
       switch (data.type) {
+        case ACTION_TYPE.SYNC_STATUS:
         case ACTION_TYPE.REQUEST_TRIP:
+          const trip = JSON.parse(data.payload);
           break;
         default:
           break;
@@ -46,7 +48,8 @@
   <div class="title">Driver</div>
   <div class="map">
     <Map lat={40} lon={-74.5} zoom={9}>
-      <Marker lat={40.2} lon={-74.5} />
+      <CenterView locations={[location, location]} />
+      <Marker lat={location.lat} lon={location.lon} />
     </Map>
   </div>
 </div>

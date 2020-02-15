@@ -51,7 +51,12 @@ class WSDriver : TextWebSocketHandler() {
         if (driverUid == "") return session.close(CloseStatus(404))
         session.attributes["driverId"] = driverUid;
         sessionList[driverUid] = session;
-        // Get last status for driverUid
+        val trip = driverController.getLastTripStatus(driverUid);
+        val payload = if (trip !== null) jacksonObjectMapper().writeValueAsString(trip) else null
+        val messageString = jacksonObjectMapper().writeValueAsString(
+            Action(ACTION_TYPE.SYNC_STATUS, payload)
+        )
+        session.sendMessage(TextMessage(messageString))
     }
 
 

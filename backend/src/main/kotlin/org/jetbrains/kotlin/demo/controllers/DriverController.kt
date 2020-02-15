@@ -26,4 +26,9 @@ class DriverController {
         val driver = GlobalAppState.instance.users[driverId]
         GlobalAppState.instance.trip[driver?.lastTripId]?.status = TripStatus.ENDED
     }
+
+    fun getLastTripStatus(driverId: String): Trip? {
+        val driver = GlobalAppState.instance.users[driverId]
+        return GlobalAppState.instance.trip[driver?.lastTripId]
+    }
 }

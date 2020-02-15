@@ -25,6 +25,7 @@
 
     webSocket.onmessage = message => {
       const data = JSON.parse(message.data);
+      debugger;
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
           if (data.payload === null)

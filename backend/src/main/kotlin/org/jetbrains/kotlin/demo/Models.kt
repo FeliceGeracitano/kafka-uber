@@ -27,14 +27,15 @@ enum class UserType {
 }
 
 
-data class Location(val lat: Double, val lng: Double)
+data class Location(val lat: Double, val lon: Double)
 data class User(val id: String, var location: Location?, val type: UserType, val lastTripId: String?)
 data class Trip(
     val id: String,
     var status: TripStatus,
     val driverId: String?,
     val riderId: String?,
-    val destination: Location
+    val from: Location,
+    val to: Location
 )
 
 data class Action(val type: ACTION_TYPE, val payload: String?)
