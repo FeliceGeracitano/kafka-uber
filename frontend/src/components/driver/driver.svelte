@@ -5,51 +5,101 @@
   import Marker from "../common/Marker.svelte";
   import { getUid } from "../../utils.ts";
   import CenterView from "../common/CenterView.svelte";
+  import LineString from "../common/LineString.svelte";
+  import { getDirections } from "../../mapbox.js";
+  import mapbox from "mapbox-gl";
+  import Button from "../common/Button.svelte";
 
-  const location = { lon: -74.5, lat: 40.2 };
+  const location = { lat: 45.474507, lon: 8.994964 }; // Bareggio
+  let webSocketConnection;
+  let from = null;
+  let trip = null;
+  let to = null;
+  let directionsGeometry = null;
+  let bounds = null;
+
+  // update bounds of direction
+  $: if (directionsGeometry && directionsGeometry.coordinates) {
+    const coordinates = directionsGeometry.coordinates;
+    bounds = coordinates.reduce(
+      (bounds, coord) => bounds.extend(coord),
+      new mapbox.LngLatBounds(coordinates[0], coordinates[0])
+    );
+  }
 
   onMount(async () => {
     const driverId = getUid("DRIVER");
-    const webSocket = new WebSocket(
+    webSocketConnection = new WebSocket(
       `ws://localhost:8080/ws-driver/websocket?driverId=${driverId}`
     );
-    webSocket.onmessage = message => {
-      debugger;
+
+    webSocketConnection.onmessage = async message => {
       const data = JSON.parse(message.data);
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
+          break;
         case ACTION_TYPE.REQUEST_TRIP:
-          const trip = JSON.parse(data.payload);
+          trip = JSON.parse(data.payload);
+          if (!trip) return;
+          const direction = await getDirections(location, trip.from, trip.to);
+          from = trip.from;
+          to = trip.to;
+          directionsGeometry = direction.routes[0].geometry;
           break;
         default:
           break;
       }
     };
   });
+
+  const handleClick = () => {
+    webSocketConnection.send(Actions.driver.confirmTrip(trip.id));
+  };
 </script>
 
 <style>
   .container {
-    padding: 1rem;
     display: flex;
     flex-direction: column;
+    margin: 1rem;
+    position: relative;
   }
   .title {
     padding: 0 0 1rem 0;
   }
   .map {
-    width: 500px;
-    height: 500px;
     box-shadow: 0 1px 20px 3px #0000003d;
+    height: 500px;
+    width: 500px;
+  }
+  .toolbar {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    top: 50px;
+    width: 100%;
   }
 </style>
 
 <div class="container">
   <div class="title">Driver</div>
   <div class="map">
-    <Map lat={40} lon={-74.5} zoom={9}>
-      <CenterView locations={[location, location]} />
-      <Marker lat={location.lat} lon={location.lon} />
+    <Map lat={location.lat} lon={location.lon}>
+      <CenterView {bounds} />
+      <Marker lat={location.lat} lon={location.lon} icon="current-location" />
+      <Marker lat={from.lat} lon={from.lon} icon="rider" />
+      <Marker lat={to.lat} lon={to.lon} icon="to" />
+      <LineString geometry={directionsGeometry} color="#44ACB9" />
     </Map>
+  </div>
+  <div class="toolbar">
+    {#if trip && trip.status === 'REQUESTING'}
+      <Button
+        style="position:absolute"
+        label="Confirm Trip"
+        class="btn"
+        onClick={handleClick} />
+    {/if}
+
   </div>
 </div>

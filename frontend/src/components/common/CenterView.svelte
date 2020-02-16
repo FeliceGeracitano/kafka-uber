@@ -2,12 +2,9 @@
   import { getContext } from "svelte";
   import { mapbox, mapContextKey } from "../../mapbox.js";
 
-  export let locations = [];
-
+  export let bounds = null;
   const { getMap } = getContext(mapContextKey);
   const map = getMap();
-  const box = locations.map(loc => [loc.lon, loc.lat]);
-  map.fitBounds(box, {
-    padding: 50
-  });
+
+  if (bounds) map.fitBounds(bounds, { padding: 50 });
 </script>

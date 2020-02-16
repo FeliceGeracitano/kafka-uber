@@ -12,12 +12,17 @@
 
   onMount(() => {
     const center = lon && lat ? [lon, lat] : undefined;
-    map = new mapbox.Map({
+    const localRef = new mapbox.Map({
       container,
       style: "mapbox://styles/mapbox/streets-v9",
       center,
-      zoom
+      zoom: zoom ? zoom : 15
     });
+
+    localRef.on("load", function() {
+      map = localRef;
+    });
+
     return () => {
       map.remove();
     };

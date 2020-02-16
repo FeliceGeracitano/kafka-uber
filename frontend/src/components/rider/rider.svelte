@@ -5,31 +5,42 @@
   import CenterView from "../common/CenterView.svelte";
   import { getUid } from "../../utils.ts";
   import Actions, { ACTION_TYPE } from "../../actions.ts";
+  import LineString from "../common/LineString.svelte";
+  import mapbox from "mapbox-gl";
+  import { getDirections } from "../../mapbox.js";
 
-  // Bareggio
-  const location = {
-    lon: 8.9936027,
-    lat: 45.4732452
-  };
-  const destination = {
-    lon: 9.0911366,
-    lat: 45.5051679
-  };
-  const zoom = 14;
+  const location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
+  const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
+  let directionsGeometry = null;
+  let bounds = null;
+
+  // update bounds of direction
+  $: if (directionsGeometry && directionsGeometry.coordinates) {
+    const coordinates = directionsGeometry.coordinates;
+    bounds = coordinates.reduce(
+      (bounds, coord) => bounds.extend(coord),
+      new mapbox.LngLatBounds(coordinates[0], coordinates[0])
+    );
+  }
 
   onMount(async () => {
     const riderId = getUid("RIDER");
-    const webSocket = new WebSocket(
+    const webSocketConnection = new WebSocket(
       `ws://localhost:8080/ws-rider/websocket?riderId=${riderId}`
     );
 
-    webSocket.onmessage = message => {
+    webSocketConnection.onmessage = async message => {
       const data = JSON.parse(message.data);
-      debugger;
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
-          if (data.payload === null)
-            webSocket.send(Actions.rider.requestTrip(location, destination));
+          if (data.payload) {
+            const direction = await getDirections(location, destination);
+            directionsGeometry = direction.routes[0].geometry;
+            return;
+          }
+          webSocketConnection.send(
+            Actions.rider.requestTrip(location, destination)
+          );
           break;
         default:
           break;
@@ -57,10 +68,11 @@
 <div class="container">
   <div class="title">Rider</div>
   <div class="map">
-    <Map lat={location.lat} lon={location.lon} {zoom}>
-      <CenterView locations={[location, destination]} />
-      <Marker lat={location.lat} lon={location.lon} />
-      <Marker lat={destination.lat} lon={destination.lon} />
+    <Map lat={location.lat} lon={location.lon}>
+      <CenterView {bounds} />
+      <Marker lat={location.lat} lon={location.lon} icon="current-location" />
+      <Marker lat={destination.lat} lon={destination.lon} icon="to" />
+      <LineString geometry={directionsGeometry} color="#19C681" />
     </Map>
   </div>
 </div>

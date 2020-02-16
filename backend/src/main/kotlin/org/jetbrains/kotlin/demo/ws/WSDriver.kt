@@ -17,7 +17,6 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 
 
-
 @Configuration
 @EnableWebSocket
 class WSDriverConfig : WebSocketConfigurer {
@@ -47,22 +46,31 @@ class WSDriver : TextWebSocketHandler() {
     @Throws(Exception::class)
     override fun afterConnectionEstablished(session: WebSocketSession) {
         val parameters = parseURlQuery(session.uri.query)
-        val driverUid = parameters["driverId"] ?: "";
-        if (driverUid == "") return session.close(CloseStatus(404))
-        session.attributes["driverId"] = driverUid;
-        sessionList[driverUid] = session;
-        val trip = driverController.getLastTripStatus(driverUid);
-        val payload = if (trip !== null) jacksonObjectMapper().writeValueAsString(trip) else null
-        val messageString = jacksonObjectMapper().writeValueAsString(
-            Action(ACTION_TYPE.SYNC_STATUS, payload)
-        )
-        session.sendMessage(TextMessage(messageString))
+        val driverId = parameters["driverId"] ?: "";
+        if (driverId == "") return session.close(CloseStatus(404))
+        session.attributes["driverId"] = driverId;
+        sessionList[driverId] = session;
+
+        // send SYNC_STATUS message
+        val lastTrip = driverController.getLastTripStatus(driverId)
+        if (lastTrip !== null) {
+            session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(
+                Action(ACTION_TYPE.SYNC_STATUS, jacksonObjectMapper().writeValueAsString(lastTrip))
+            )))
+        }
+
+        // send REQUEST_TRIP message
+        val requestingTrip = driverController.getPedingRequests(driverId) ?: return
+        session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(
+            Action(ACTION_TYPE.REQUEST_TRIP, jacksonObjectMapper().writeValueAsString(requestingTrip))
+        )))
+
     }
 
 
     @Throws(Exception::class)
     public override fun handleTextMessage(session: WebSocketSession?, textMessage: TextMessage?) {
-        println(session?.attributes?.get("driverId"))
+        println("driverId" + session?.attributes?.get("driverId"))
         val jsonString = textMessage?.payload.toString()
         val action = jsonParser.parse<Action>(jsonString) as Action
         val driverId = session?.attributes?.get("driverId") as String
@@ -71,7 +79,7 @@ class WSDriver : TextWebSocketHandler() {
         when (action?.type) {
             ACTION_TYPE.CONFIRM_RIDE -> {
                 val payload = jsonParser.parse<ConfirmRidePayload>(action.payload) as ConfirmRidePayload
-                driverController.confirmTrip(driverId, payload.tripId,  payload.driverLocation)
+                driverController.confirmTrip(driverId, payload.tripId, payload.driverLocation)
             }
             ACTION_TYPE.UPDATE_DRIVER_LOCATION -> {
                 val location = jsonParser.parse<Location>(action.payload) as Location
@@ -84,7 +92,6 @@ class WSDriver : TextWebSocketHandler() {
 
     private fun emit(session: WebSocketSession, msg: Action) =
         session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
-
 
 
     fun sendMessage(driverId: String, msg: String) {

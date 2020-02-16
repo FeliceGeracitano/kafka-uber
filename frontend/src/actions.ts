@@ -9,11 +9,11 @@ export default {
     requestTrip: (from, to) =>
       JSON.stringify({
         type: ACTION_TYPE.REQUEST_TRIP,
-        payload: JSON.stringify({
-          destination: from,
-          riderLocation: to
-        })
+        payload: JSON.stringify({ destination: from, riderLocation: to })
       })
   },
-  driver: {}
+  driver: {
+    confirmTrip: tripId =>
+      JSON.stringify({ type: ACTION_TYPE.CONFIRM_TRIP, payload: tripId })
+  }
 };

@@ -18,7 +18,7 @@ class RiderController(
     fun handleRequestRide(riderId: String, riderLocation: Location, destination: Location) {
         val uuid: UUID = UUID.randomUUID()
         val tripUUID: String = uuid.toString()
-        val trip = Trip(tripUUID, TripStatus.REQUESTING, null, riderId, destination)
+        val trip = Trip(tripUUID, TripStatus.REQUESTING, null, riderId, riderLocation, destination)
         val rider = User(riderId, riderLocation, UserType.RIDER, tripUUID)
         GlobalAppState.instance.trip[trip.id] = trip
         GlobalAppState.instance.users[rider.id] = rider
@@ -41,7 +41,7 @@ class RiderController(
     }
 
 
-
+    // TODO: Maybe create a global Action Creator
     companion object {
         val objectMapper = jacksonObjectMapper()
         val REQUEST_TRIP = Action(ACTION_TYPE.REQUEST_TRIP, null)
