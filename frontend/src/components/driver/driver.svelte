@@ -53,7 +53,7 @@
   });
 
   const handleClick = () => {
-    webSocketConnection.send(Actions.driver.confirmTrip(trip.id));
+    webSocketConnection.send(Actions.driver.confirmTrip(trip.id, location));
   };
 </script>
 
@@ -87,8 +87,12 @@
     <Map lat={location.lat} lon={location.lon}>
       <CenterView {bounds} />
       <Marker lat={location.lat} lon={location.lon} icon="current-location" />
-      <Marker lat={from.lat} lon={from.lon} icon="rider" />
-      <Marker lat={to.lat} lon={to.lon} icon="to" />
+      {#if from}
+        <Marker lat={from.lat} lon={from.lon} icon="rider" />
+      {/if}
+      {#if to}
+        <Marker lat={to.lat} lon={to.lon} icon="to" />
+      {/if}
       <LineString geometry={directionsGeometry} color="#44ACB9" />
     </Map>
   </div>
@@ -100,6 +104,5 @@
         class="btn"
         onClick={handleClick} />
     {/if}
-
   </div>
 </div>

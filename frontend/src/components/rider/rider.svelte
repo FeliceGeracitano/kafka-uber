@@ -12,6 +12,7 @@
   const location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
   const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
   let directionsGeometry = null;
+  let trip;
   let bounds = null;
 
   // update bounds of direction
@@ -33,11 +34,15 @@
       const data = JSON.parse(message.data);
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
-          if (data.payload) {
-            const direction = await getDirections(location, destination);
+          trip = JSON.parse(data.payload);
+          if (trip) {
+            const direction = await getDirections(location, trip.to);
             directionsGeometry = direction.routes[0].geometry;
             return;
           }
+
+          const direction = await getDirections(location, destination);
+          directionsGeometry = direction.routes[0].geometry;
           webSocketConnection.send(
             Actions.rider.requestTrip(location, destination)
           );

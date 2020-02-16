@@ -77,7 +77,7 @@ class WSDriver : TextWebSocketHandler() {
         if (action.payload == null) throw Error("Missing Location Payload")
 
         when (action?.type) {
-            ACTION_TYPE.CONFIRM_RIDE -> {
+            ACTION_TYPE.CONFIRM_TRIP -> {
                 val payload = jsonParser.parse<ConfirmRidePayload>(action.payload) as ConfirmRidePayload
                 driverController.confirmTrip(driverId, payload.tripId, payload.driverLocation)
             }

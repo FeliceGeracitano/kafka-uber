@@ -13,7 +13,10 @@ export default {
       })
   },
   driver: {
-    confirmTrip: tripId =>
-      JSON.stringify({ type: ACTION_TYPE.CONFIRM_TRIP, payload: tripId })
+    confirmTrip: (tripId, driverLocation) =>
+      JSON.stringify({
+        type: ACTION_TYPE.CONFIRM_TRIP,
+        payload: JSON.stringify({ tripId, driverLocation })
+      })
   }
 };

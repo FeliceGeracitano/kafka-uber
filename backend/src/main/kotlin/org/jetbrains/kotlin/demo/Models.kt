@@ -5,7 +5,7 @@ enum class ACTION_TYPE {
     REQUEST_TRIP,
 
     // Driver
-    CONFIRM_RIDE,
+    CONFIRM_TRIP,
     UPDATE_DRIVER_LOCATION,
     START_RIDE,
     END_RIDE,
