@@ -6,21 +6,20 @@
   import { getUid } from "../../utils.ts";
   import Actions, { ACTION_TYPE } from "../../actions.ts";
   import LineString from "../common/LineString.svelte";
-  import mapbox from "mapbox-gl";
+  import mapBox from "mapbox-gl";
   import { getDirections } from "../../mapbox.js";
 
   const location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
   const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
   let directionsGeometry = null;
   let trip;
-  let bounds = null;
+  let bounds;
 
-  // update bounds of direction
-  $: if (directionsGeometry && directionsGeometry.coordinates) {
+  $: if (directionsGeometry && directionsGeometry.coordinates.length) {
     const coordinates = directionsGeometry.coordinates;
     bounds = coordinates.reduce(
-      (bounds, coord) => bounds.extend(coord),
-      new mapbox.LngLatBounds(coordinates[0], coordinates[0])
+      (bounds, cord) => bounds.extend(cord),
+      new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0)
     );
   }
 

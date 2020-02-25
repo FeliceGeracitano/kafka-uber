@@ -1,5 +1,5 @@
 <script>
-  import { getContext } from "svelte";
+  import { getContext, afterUpdate } from "svelte";
   import { mapbox, mapContextKey } from "../../mapbox.js";
   import { onMount } from "svelte";
 
@@ -11,11 +11,11 @@
 
   let markerDOM;
 
-  $: {
+  afterUpdate(() => {
     const map = getMap();
     if (oldMarker) oldMarker.remove();
     oldMarker = new mapbox.Marker(markerDOM).setLngLat([lon, lat]).addTo(map);
-  }
+  });
 </script>
 
 <style>

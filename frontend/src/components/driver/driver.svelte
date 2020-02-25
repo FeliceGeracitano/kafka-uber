@@ -7,7 +7,7 @@
   import CenterView from "../common/CenterView.svelte";
   import LineString from "../common/LineString.svelte";
   import { getDirections } from "../../mapbox.js";
-  import mapbox from "mapbox-gl";
+  import mapBox from "mapbox-gl";
   import Button from "../common/Button.svelte";
 
   const location = { lat: 45.474507, lon: 8.994964 }; // Bareggio
@@ -19,11 +19,11 @@
   let bounds = null;
 
   // update bounds of direction
-  $: if (directionsGeometry && directionsGeometry.coordinates) {
+  $: if (directionsGeometry && directionsGeometry.coordinates.length) {
     const coordinates = directionsGeometry.coordinates;
     bounds = coordinates.reduce(
       (bounds, coord) => bounds.extend(coord),
-      new mapbox.LngLatBounds(coordinates[0], coordinates[0])
+      new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0)
     );
   }
 

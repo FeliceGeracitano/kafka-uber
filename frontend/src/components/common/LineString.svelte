@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext } from "svelte";
+  import { getContext, afterUpdate } from "svelte";
   import { mapbox, mapContextKey } from "../../mapbox.js";
 
   export let geometry;
@@ -8,29 +8,23 @@
   const { getMap } = getContext(mapContextKey);
   const map = getMap();
 
-  if (map.getSource("LineString")) map.removeSource("LineString");
-
-  const geojson = {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        geometry
-      }
-    ]
-  };
-
-  map.addSource("LineString", {
-    type: "geojson",
-    data: geojson
+  afterUpdate(() => {
+    if (!geometry) return;
+    if (map.getSource("LineString")) map.removeSource("LineString");
+    const geojson = {
+      type: "FeatureCollection",
+      features: [{ type: "Feature", geometry }]
+    };
+    map.addSource("LineString", {
+      type: "geojson",
+      data: geojson
+    });
+    map.addLayer({
+      id: "LineString",
+      type: "line",
+      source: "LineString",
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: { "line-color": color, "line-width": 8 }
+    });
   });
-  map.addLayer({
-    id: "LineString",
-    type: "line",
-    source: "LineString",
-    layout: { "line-join": "round", "line-cap": "round" },
-    paint: { "line-color": color, "line-width": 8 }
-  });
-
-  window.map = map;
 </script>
