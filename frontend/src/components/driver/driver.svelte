@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Map from "../common/Map.svelte";
-  import Actions, { ACTION_TYPE } from "../../actions.ts";
+  import Actions, { ACTION_TYPE } from "../../actions";
   import Marker from "../common/Marker.svelte";
-  import { getUid } from "../../utils.ts";
+  import { getUid } from "../../utils";
   import CenterView from "../common/CenterView.svelte";
   import LineString from "../common/LineString.svelte";
   import { getDirections } from "../../mapbox.js";

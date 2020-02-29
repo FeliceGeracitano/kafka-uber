@@ -1,10 +1,10 @@
-<script lang="ts">
+<script>
   import { onMount } from "svelte";
   import Map from "../common/Map.svelte";
   import Marker from "../common/Marker.svelte";
   import CenterView from "../common/CenterView.svelte";
-  import { getUid } from "../../utils.ts";
-  import Actions, { ACTION_TYPE } from "../../actions.ts";
+  import { getUid } from "../../utils";
+  import Actions, { ACTION_TYPE } from "../../actions";
   import LineString from "../common/LineString.svelte";
   import mapBox from "mapbox-gl";
   import { getDirections } from "../../mapbox.js";
@@ -13,6 +13,7 @@
   const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
   let directionsGeometry = null;
   let trip;
+  let driver;
   let bounds;
 
   $: if (directionsGeometry && directionsGeometry.coordinates.length) {
@@ -31,6 +32,7 @@
 
     webSocketConnection.onmessage = async message => {
       const data = JSON.parse(message.data);
+      debugger;
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
           trip = JSON.parse(data.payload);
@@ -39,12 +41,21 @@
             directionsGeometry = direction.routes[0].geometry;
             return;
           }
-
           const direction = await getDirections(location, destination);
           directionsGeometry = direction.routes[0].geometry;
           webSocketConnection.send(
             Actions.rider.requestTrip(location, destination)
           );
+          break;
+        case ACTION_TYPE.CONFIRM_TRIP:
+          trip = JSON.parse(data.payload);
+          debugger;
+          // driver confirmed, show driver car
+          break;
+        case ACTION_TYPE.UPDATE_DRIVER_LOCATION:
+          driver = JSON.parse(data.payload);
+          debugger;
+          // update driver location
           break;
         default:
           break;
@@ -74,6 +85,7 @@
   <div class="map">
     <Map lat={location.lat} lon={location.lon}>
       <CenterView {bounds} />
+      <!-- <Marker lat={driver?.location?.lat} lon={driver?.location?.lon} icon="driver" /> -->
       <Marker lat={location.lat} lon={location.lon} icon="current-location" />
       <Marker lat={destination.lat} lon={destination.lon} icon="to" />
       <LineString geometry={directionsGeometry} color="#19C681" />

@@ -25,7 +25,7 @@
   }
 
   .to {
-    background: url(/flag-checkered-solid.svg);
+    background: url(/images/flag-checkered-solid.svg);
     background-color: white;
     box-shadow: 0px 0px 0px 5px white;
     box-shadow: 0px 0px 0px 6px rgba(0, 0, 0, 0.06);
@@ -33,7 +33,7 @@
     border: 3px solid white;
   }
   .driver {
-    background: url(/car-solid.svg);
+    background: url(/images/car-solid.svg);
     background-color: white;
     box-shadow: 0px 0px 0px 5px white;
     box-shadow: 0px 0px 0px 6px rgba(0, 0, 0, 0.06);
@@ -46,7 +46,7 @@
   }
 
   .rider {
-    background: url(/male-solid.svg);
+    background: url(/images/male-solid.svg);
     background-color: white;
     box-shadow: 0px 0px 0px 5px white;
     box-shadow: 0px 0px 0px 6px rgba(0, 0, 0, 0.06);

@@ -31,7 +31,7 @@ class WSDriverConfig : WebSocketConfigurer {
 
 
 @Controller
-class WSDriver : TextWebSocketHandler() {
+    class WSDriver : TextWebSocketHandler() {
     private val sessionList = mutableMapOf<String, WebSocketSession>();
     private val jsonParser = Klaxon()
 
@@ -50,6 +50,7 @@ class WSDriver : TextWebSocketHandler() {
         if (driverId == "") return session.close(CloseStatus(404))
         session.attributes["driverId"] = driverId;
         sessionList[driverId] = session;
+        driverController.init(driverId)
 
         // send SYNC_STATUS message
         val lastTrip = driverController.getLastTripStatus(driverId)
@@ -60,7 +61,7 @@ class WSDriver : TextWebSocketHandler() {
         }
 
         // send REQUEST_TRIP message
-        val requestingTrip = driverController.getPedingRequests(driverId) ?: return
+        val requestingTrip = driverController.getPendingRequests(driverId) ?: return
         session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(
             Action(ACTION_TYPE.REQUEST_TRIP, jacksonObjectMapper().writeValueAsString(requestingTrip))
         )))
@@ -85,8 +86,8 @@ class WSDriver : TextWebSocketHandler() {
                 val location = jsonParser.parse<Location>(action.payload) as Location
                 driverController.updateLocation(driverId, location)
             }
-            ACTION_TYPE.START_RIDE -> driverController.startTrip(driverId)
-            ACTION_TYPE.END_RIDE -> driverController.endTrip(driverId)
+            ACTION_TYPE.START_TRIP -> driverController.startTrip(driverId)
+            ACTION_TYPE.END_TRIP -> driverController.endTrip(driverId)
         }
     }
 

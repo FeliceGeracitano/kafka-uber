@@ -71,7 +71,7 @@ class WSRider : TextWebSocketHandler() {
             when (action?.type) {
                 ACTION_TYPE.REQUEST_TRIP -> {
                 val (destination, riderLocation) = jsonParser.parse<RequestRidePayload>(action.payload) as RequestRidePayload
-                riderController.handleRequestRide(riderId, destination, riderLocation);
+                riderController.handleRequestTrip(riderId, destination, riderLocation);
             }
         }
 

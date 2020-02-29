@@ -7,8 +7,8 @@ enum class ACTION_TYPE {
     // Driver
     CONFIRM_TRIP,
     UPDATE_DRIVER_LOCATION,
-    START_RIDE,
-    END_RIDE,
+    START_TRIP,
+    END_TRIP,
 
     SYNC_STATUS
 }
@@ -28,11 +28,11 @@ enum class UserType {
 
 
 data class Location(val lat: Double, val lon: Double)
-data class User(val id: String, var location: Location?, val type: UserType, val lastTripId: String?)
+data class User(val id: String, var location: Location?, val type: UserType, var lastTripId: String?)
 data class Trip(
     val id: String,
     var status: TripStatus,
-    val driverId: String?,
+    var driverId: String?,
     val riderId: String?,
     val from: Location,
     val to: Location
