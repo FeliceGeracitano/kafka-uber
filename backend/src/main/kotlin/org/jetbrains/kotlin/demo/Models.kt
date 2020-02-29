@@ -35,7 +35,8 @@ data class Trip(
     var driverId: String?,
     val riderId: String?,
     val from: Location,
-    val to: Location
+    val to: Location,
+    var driver: User?
 )
 
 data class Action(val type: ACTION_TYPE, val payload: String?)

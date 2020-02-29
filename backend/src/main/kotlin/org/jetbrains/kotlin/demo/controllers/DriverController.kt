@@ -23,7 +23,12 @@ class DriverController {
     }
 
     fun confirmTrip(driverId: String, tripId: String, driverLocation: Location) {
+        // Update Driver
+        GlobalAppState.instance.users[driverId]?.location = driverLocation
         GlobalAppState.instance.users[driverId]!!.lastTripId = tripId
+
+        // Update Trip
+        GlobalAppState.instance.trip[tripId]!!.driver = GlobalAppState.instance.users[driverId]!!
         GlobalAppState.instance.trip[tripId]!!.driverId = driverId
         GlobalAppState.instance.trip[tripId]!!.status = TripStatus.CONFIRMED
         riderCtrl.tripConfirmed(driverId)

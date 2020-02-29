@@ -12,16 +12,21 @@
   const location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
   const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
   let directionsGeometry = null;
+
   let trip;
-  let driver;
+  let driver = {};
   let bounds;
 
   $: if (directionsGeometry && directionsGeometry.coordinates.length) {
     const coordinates = directionsGeometry.coordinates;
-    bounds = coordinates.reduce(
-      (bounds, cord) => bounds.extend(cord),
-      new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0)
-    );
+    bounds = coordinates
+      .filter(Boolean)
+      .reduce(
+        (bounds, cord) => bounds.extend(cord),
+        new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0)
+      );
+    if (driver && driver.location)
+      bounds.extend([driver.location.lon, driver.location.lat]);
   }
 
   onMount(async () => {
@@ -32,13 +37,13 @@
 
     webSocketConnection.onmessage = async message => {
       const data = JSON.parse(message.data);
-      debugger;
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
           trip = JSON.parse(data.payload);
           if (trip) {
             const direction = await getDirections(location, trip.to);
             directionsGeometry = direction.routes[0].geometry;
+            driver = trip.driver;
             return;
           }
           const direction = await getDirections(location, destination);
@@ -49,12 +54,11 @@
           break;
         case ACTION_TYPE.CONFIRM_TRIP:
           trip = JSON.parse(data.payload);
-          debugger;
           // driver confirmed, show driver car
           break;
         case ACTION_TYPE.UPDATE_DRIVER_LOCATION:
           driver = JSON.parse(data.payload);
-          debugger;
+          console.log("driver", driver);
           // update driver location
           break;
         default:
@@ -85,7 +89,12 @@
   <div class="map">
     <Map lat={location.lat} lon={location.lon}>
       <CenterView {bounds} />
-      <!-- <Marker lat={driver?.location?.lat} lon={driver?.location?.lon} icon="driver" /> -->
+      {#if driver && driver.location}
+        <Marker
+          lat={driver.location.lat}
+          lon={driver.location.lon}
+          icon="driver" />
+      {/if}
       <Marker lat={location.lat} lon={location.lon} icon="current-location" />
       <Marker lat={destination.lat} lon={destination.lon} icon="to" />
       <LineString geometry={directionsGeometry} color="#19C681" />

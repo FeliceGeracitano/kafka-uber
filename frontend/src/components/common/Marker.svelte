@@ -12,6 +12,7 @@
   let markerDOM;
 
   afterUpdate(() => {
+    if (!lat || !lon) return;
     const map = getMap();
     if (oldMarker) oldMarker.remove();
     oldMarker = new mapbox.Marker(markerDOM).setLngLat([lon, lat]).addTo(map);

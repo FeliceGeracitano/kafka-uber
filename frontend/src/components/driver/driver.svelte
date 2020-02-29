@@ -3,24 +3,31 @@
   import Map from "../common/Map.svelte";
   import Actions, { ACTION_TYPE } from "../../actions";
   import Marker from "../common/Marker.svelte";
+  import MovingMarker from "../common/MovingMarker.svelte";
   import { getUid } from "../../utils";
   import CenterView from "../common/CenterView.svelte";
   import LineString from "../common/LineString.svelte";
   import { getDirections } from "../../mapbox.js";
   import mapBox from "mapbox-gl";
   import Button from "../common/Button.svelte";
+  import turfAlong from "@turf/along";
+  import BackCamera from "../common/BackCamera.svelte";
 
-  const location = { lat: 45.474507, lon: 8.994964 }; // Bareggio
+  let driverLocation = { lat: 45.474507, lon: 8.994964 }; // Bareggio
   let webSocketConnection;
   let from = null;
   let trip = null;
   let to = null;
-  let directionsGeometry = null;
+  let route = null;
+  $: metersPerSecond = route ? route.distance / route.duration : null;
   let bounds = null;
+  let drivingInterval;
+  let start;
+  $: tripStatus = trip ? trip.status : null;
 
   // update bounds of direction
-  $: if (directionsGeometry && directionsGeometry.coordinates.length) {
-    const coordinates = directionsGeometry.coordinates;
+  $: if (route && route.geometry && route.geometry.coordinates.length) {
+    const coordinates = route.geometry.coordinates;
     bounds = coordinates.reduce(
       (bounds, coord) => bounds.extend(coord),
       new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0)
@@ -32,20 +39,22 @@
     webSocketConnection = new WebSocket(
       `ws://localhost:8080/ws-driver/websocket?driverId=${driverId}`
     );
-
     webSocketConnection.onmessage = async message => {
       const data = JSON.parse(message.data);
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
+          trip = JSON.parse(data.payload);
+          if (trip.status !== "CONFIRMED") return;
+          await fetchDirections();
+          animateDriver(0);
           break;
+
         case ACTION_TYPE.REQUEST_TRIP:
           trip = JSON.parse(data.payload);
           if (!trip) return;
-          const direction = await getDirections(location, trip.from, trip.to);
-          from = trip.from;
-          to = trip.to;
-          directionsGeometry = direction.routes[0].geometry;
+          await fetchDirections();
           break;
+
         default:
           break;
       }
@@ -53,7 +62,30 @@
   });
 
   const handleClick = () => {
-    webSocketConnection.send(Actions.driver.confirmTrip(trip.id, location));
+    webSocketConnection.send(
+      Actions.driver.confirmTrip(trip.id, driverLocation)
+    );
+    trip = { ...trip, status: "CONFIRMED" };
+    animateDriver(0);
+  };
+
+  const fetchDirections = async () => {
+    const direction = await getDirections(driverLocation, trip.from, trip.to);
+    from = trip.from;
+    to = trip.to;
+    route = direction.routes[0];
+  };
+
+  const animateDriver = timestamp => {
+    if (!start) start = timestamp;
+    var progressSeconds = (timestamp - start) / 1000;
+    var progressMeter = progressSeconds * metersPerSecond;
+    const along = turfAlong(route.geometry, progressMeter / 1000, {
+      units: "kilometers"
+    });
+    let [lon, lat] = along.geometry.coordinates;
+    driverLocation = { lon, lat };
+    if (progressSeconds < route.duration) requestAnimationFrame(animateDriver);
   };
 </script>
 
@@ -84,16 +116,27 @@
 <div class="container">
   <div class="title">Driver</div>
   <div class="map">
-    <Map lat={location.lat} lon={location.lon}>
-      <CenterView {bounds} />
-      <Marker lat={location.lat} lon={location.lon} icon="current-location" />
+    <Map lat={driverLocation.lat} lon={driverLocation.lon}>
+
+      {#if tripStatus !== 'CONFIRMED'}
+        <CenterView {bounds} />
+      {/if}
+
+      {#if tripStatus === 'CONFIRMED'}
+        <BackCamera location={driverLocation} />
+      {/if}
+
+      <Marker
+        lat={driverLocation.lat}
+        lon={driverLocation.lon}
+        icon="current-location" />
       {#if from}
         <Marker lat={from.lat} lon={from.lon} icon="rider" />
       {/if}
       {#if to}
         <Marker lat={to.lat} lon={to.lon} icon="to" />
       {/if}
-      <LineString geometry={directionsGeometry} color="#44ACB9" />
+      <LineString geometry={route ? route.geometry : null} color="#44ACB9" />
     </Map>
   </div>
   <div class="toolbar">
