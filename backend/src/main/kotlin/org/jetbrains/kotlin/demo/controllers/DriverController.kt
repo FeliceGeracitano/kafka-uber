@@ -43,6 +43,7 @@ class DriverController {
     fun startTrip(driverId: String) {
         val driver = GlobalAppState.instance.users[driverId]
         GlobalAppState.instance.trip[driver?.lastTripId]?.status = TripStatus.STARTED
+        riderCtrl.handleStartTrip(driverId)
     }
 
     fun endTrip(driverId: String) {

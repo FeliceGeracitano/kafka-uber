@@ -71,18 +71,18 @@ class WSDriverConfig : WebSocketConfigurer {
 
     @Throws(Exception::class)
     public override fun handleTextMessage(session: WebSocketSession?, textMessage: TextMessage?) {
-        println("driverId" + session?.attributes?.get("driverId"))
         val jsonString = textMessage?.payload.toString()
         val action = jsonParser.parse<Action>(jsonString) as Action
         val driverId = session?.attributes?.get("driverId") as String
-        if (action.payload == null) throw Error("Missing Location Payload")
 
         when (action?.type) {
             ACTION_TYPE.CONFIRM_TRIP -> {
+                if (action.payload == null) throw Error("Missing Location Payload")
                 val payload = jsonParser.parse<ConfirmRidePayload>(action.payload) as ConfirmRidePayload
                 driverController.confirmTrip(driverId, payload.tripId, payload.driverLocation)
             }
             ACTION_TYPE.UPDATE_DRIVER_LOCATION -> {
+                if (action.payload == null) throw Error("Missing Location Payload")
                 val location = jsonParser.parse<Location>(action.payload) as Location
                 driverController.updateLocation(driverId, location)
             }

@@ -44,6 +44,12 @@ class RiderController {
         wsRider.sendMessageToRider(riderId, objectMapper.writeValueAsString(driverUpdateLocation(driver)))
     }
 
+    fun handleStartTrip(driverId: String) {
+        val riderId = driverId.replaceFirst("D", "R")
+        val rider = GlobalAppState.instance.users[riderId]!!
+        val trip = GlobalAppState.instance.trip[rider.lastTripId]!!
+        wsRider.sendMessageToRider(riderId, objectMapper.writeValueAsString(startTrip(trip)))
+    }
 
 
     // TODO: Maybe create a global Action Creator
@@ -53,11 +59,19 @@ class RiderController {
         fun requestRideAction(trip: Trip): Action {
             return Action(ACTION_TYPE.REQUEST_TRIP, objectMapper.writeValueAsString(trip))
         }
+
         fun confirmTrip(trip: Trip): Action {
             return Action(ACTION_TYPE.CONFIRM_TRIP, objectMapper.writeValueAsString(trip))
         }
+
         val driverUpdateLocation =
             { user: User -> Action(ACTION_TYPE.UPDATE_DRIVER_LOCATION, objectMapper.writeValueAsString(user)) }
+
+
+        fun startTrip(trip: Trip): Action {
+            return Action(ACTION_TYPE.START_TRIP, objectMapper.writeValueAsString(trip))
+        }
+
     }
 
 }

@@ -30,10 +30,8 @@ class KafkaProducer() {
     }
 
     private fun produce(topic: String, key: String, value: String) {
-        println("Sending record... $value")
         val futureResult = producer.send(ProducerRecord(topic, key, value))
         futureResult.get()
-        println("Record sent.")
     }
 
     fun produceTrip(trip: Trip) {

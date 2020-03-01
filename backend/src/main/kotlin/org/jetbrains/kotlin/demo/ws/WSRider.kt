@@ -62,7 +62,6 @@ class WSRider : TextWebSocketHandler() {
 
     @Throws(Exception::class)
     public override fun handleTextMessage(session: WebSocketSession?, textMessage: TextMessage?) {
-        println("riderId" + session?.attributes?.get("riderId"))
         val jsonString = textMessage?.payload.toString()
         val riderId = session?.attributes?.get("riderId") as String
         val action = jsonParser.parse<Action>(jsonString) as Action
