@@ -7,7 +7,6 @@
   const map = getMap();
 
   afterUpdate(() => {
-    console.log("bounds", bounds);
     if (!bounds || bounds.isEmpty()) return;
     map.fitBounds(bounds, { padding: 50 });
   });

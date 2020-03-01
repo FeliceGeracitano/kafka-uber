@@ -25,7 +25,7 @@
     var bearing = Math.ceil(TurfRhumbBearing(point2, point1));
 
     if (bearing !== oldBearing) {
-      map.rotateTo(bearing, { duration: 500 });
+      map.rotateTo(bearing, { duration: 200 });
     } else {
       map.easeTo({
         pitch: 60,

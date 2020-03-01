@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import Map from "../common/Map.svelte";
-  import Actions, { ACTION_TYPE } from "../../actions";
-  import Marker from "../common/Marker.svelte";
-  import MovingMarker from "../common/MovingMarker.svelte";
+  import { getDirections } from "../../mapbox.js";
   import { getUid } from "../../utils";
+  import { onMount } from "svelte";
+  import Actions, { ACTION_TYPE } from "../../actions";
+  import BackCamera from "../common/BackCamera.svelte";
+  import Button from "../common/Button.svelte";
   import CenterView from "../common/CenterView.svelte";
   import LineString from "../common/LineString.svelte";
-  import { getDirections } from "../../mapbox.js";
+  import Map from "../common/Map.svelte";
   import mapBox from "mapbox-gl";
-  import Button from "../common/Button.svelte";
-  import turfAlong from "@turf/along";
-  import BackCamera from "../common/BackCamera.svelte";
+  import Marker from "../common/Marker.svelte";
+  import MovingMarker from "../common/MovingMarker.svelte";
   import throttle from "lodash-es/throttle";
+  import turf from "@turf/turf";
 
   let driverLocation = { lat: 45.474507, lon: 8.994964 }; // Bareggio
   let webSocketConnection;
@@ -20,7 +20,7 @@
   let trip = null;
   let to = null;
   let route = null;
-  $: metersPerSecond = route ? route.distance / route.duration : null;
+  $: metersPerSecond = route ? (route.distance / route.duration) * 30 : null;
   let bounds = null;
   let drivingInterval;
   let start;
@@ -85,14 +85,27 @@
     if (!start) start = timestamp;
     var progressSeconds = (timestamp - start) / 1000;
     var progressMeter = progressSeconds * metersPerSecond;
-    const along = turfAlong(route.geometry, progressMeter / 1000, {
+    const along = turf.along(route.geometry, progressMeter / 1000, {
       units: "kilometers"
     });
     let [lon, lat] = along.geometry.coordinates;
     driverLocation = { lon, lat };
     sendLocationUpdate();
+    checkWhenCloseToRider();
     if (progressSeconds < route.duration) requestAnimationFrame(animateDriver);
   };
+
+  const checkWhenCloseToRider = throttle(() => {
+    if (trip.status !== "CONFIRMED") return;
+    const distanceFromRider = turf.distance(
+      turf.point([driverLocation.lon, driverLocation.lat]),
+      turf.point([from.lon, from.lat])
+    );
+    if (distanceFromRider <= 0.1) {
+      console.log("startTrip");
+      webSocketConnection.send(Actions.driver.startTrip());
+    }
+  }, 100);
 </script>
 
 <style>

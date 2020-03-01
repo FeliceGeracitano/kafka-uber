@@ -9,7 +9,7 @@
   import mapBox from "mapbox-gl";
   import { getDirections } from "../../mapbox.js";
 
-  const location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
+  let location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
   const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
   let directionsGeometry = null;
 
@@ -58,7 +58,10 @@
           break;
         case ACTION_TYPE.UPDATE_DRIVER_LOCATION:
           driver = JSON.parse(data.payload);
-          // update driver location
+          if (trip && trip.status === "STARTED") location = driver.location;
+          break;
+        case ACTION_TYPE.START_TRIP:
+          trip = JSON.parse(data.payload);
           break;
         default:
           break;
