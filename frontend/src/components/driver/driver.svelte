@@ -12,6 +12,7 @@
   import Button from "../common/Button.svelte";
   import turfAlong from "@turf/along";
   import BackCamera from "../common/BackCamera.svelte";
+  import throttle from "lodash-es/throttle";
 
   let driverLocation = { lat: 45.474507, lon: 8.994964 }; // Bareggio
   let webSocketConnection;
@@ -61,6 +62,10 @@
     };
   });
 
+  const sendLocationUpdate = throttle(() => {
+    webSocketConnection.send(Actions.driver.updateLocation(driverLocation));
+  }, 1000);
+
   const handleClick = () => {
     webSocketConnection.send(
       Actions.driver.confirmTrip(trip.id, driverLocation)
@@ -85,6 +90,7 @@
     });
     let [lon, lat] = along.geometry.coordinates;
     driverLocation = { lon, lat };
+    sendLocationUpdate();
     if (progressSeconds < route.duration) requestAnimationFrame(animateDriver);
   };
 </script>

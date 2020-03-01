@@ -58,7 +58,6 @@
           break;
         case ACTION_TYPE.UPDATE_DRIVER_LOCATION:
           driver = JSON.parse(data.payload);
-          console.log("driver", driver);
           // update driver location
           break;
         default:

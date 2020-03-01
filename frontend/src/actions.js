@@ -18,6 +18,11 @@ export default {
       JSON.stringify({
         type: ACTION_TYPE.CONFIRM_TRIP,
         payload: JSON.stringify({ tripId, driverLocation })
+      }),
+    updateLocation: driverLocation =>
+      JSON.stringify({
+        type: ACTION_TYPE.UPDATE_DRIVER_LOCATION,
+        payload: JSON.stringify(driverLocation)
       })
   }
 };

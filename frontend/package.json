@@ -19,6 +19,7 @@
   "dependencies": {
     "@turf/turf": "^5.1.6",
     "axios": "^0.19.2",
+    "lodash-es": "^4.17.15",
     "mapbox-gl": "1.6.1",
     "sirv-cli": "^0.4.4"
   }
