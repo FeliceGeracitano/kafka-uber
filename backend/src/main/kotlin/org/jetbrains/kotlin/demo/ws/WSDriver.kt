@@ -97,7 +97,7 @@ class WSDriverConfig : WebSocketConfigurer {
 
     fun sendMessage(driverId: String, msg: String) {
         val session = sessionList[driverId]
-        if (session === null) return
+        if (session === null || !session.isOpen) return
         session.sendMessage(TextMessage(msg))
 
     }

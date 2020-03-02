@@ -3,6 +3,7 @@ export const ACTION_TYPE = {
   REQUEST_TRIP: "REQUEST_TRIP",
   CONFIRM_TRIP: "CONFIRM_TRIP",
   START_TRIP: "START_TRIP",
+  END_TRIP: "END_TRIP",
   UPDATE_DRIVER_LOCATION: "UPDATE_DRIVER_LOCATION"
 };
 
@@ -26,9 +27,7 @@ export default {
         payload: JSON.stringify(driverLocation)
       }),
     startTrip: () =>
-      JSON.stringify({
-        type: ACTION_TYPE.START_TRIP,
-        payload: null
-      })
+      JSON.stringify({ type: ACTION_TYPE.START_TRIP, payload: null }),
+    endTrip: () => JSON.stringify({ type: ACTION_TYPE.END_TRIP, payload: null })
   }
 };

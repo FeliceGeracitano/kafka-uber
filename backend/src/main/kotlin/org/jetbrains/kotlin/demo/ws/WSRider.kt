@@ -84,6 +84,7 @@ class WSRider : TextWebSocketHandler() {
 
     public fun sendMessageToRider(riderId: String, msg: String) {
         val session = sessionList[riderId]
+        if (session === null || !session.isOpen) return
         session?.sendMessage(TextMessage(msg))
     }
 

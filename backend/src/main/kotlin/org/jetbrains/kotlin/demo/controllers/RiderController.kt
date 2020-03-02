@@ -51,6 +51,12 @@ class RiderController {
         wsRider.sendMessageToRider(riderId, objectMapper.writeValueAsString(startTrip(trip)))
     }
 
+    fun endTrip(driverId: String) {
+        val riderId = driverId.replaceFirst("D", "R")
+        val rider = GlobalAppState.instance.users[riderId]!!
+        rider.lastTripId = null
+    }
+
 
     // TODO: Maybe create a global Action Creator
     companion object {

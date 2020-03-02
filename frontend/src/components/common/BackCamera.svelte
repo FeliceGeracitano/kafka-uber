@@ -12,30 +12,34 @@
   const { getMap } = getContext(mapContextKey);
   const map = getMap();
 
-  afterUpdate(() => {
-    if (!location) return;
-
-    if (map.isMoving() || map.isZooming() || map.isRotating()) return;
-
-    var point1 = point([location.lon, location.lat]);
-    var point2 = point([
+  const getBearing = () => {
+    const point1 = point([location.lon, location.lat]);
+    const point2 = point([
       (prevLocation || location).lon,
       (prevLocation || location).lat
     ]);
-    var bearing = Math.ceil(TurfRhumbBearing(point2, point1));
+    return Math.ceil(TurfRhumbBearing(point2, point1));
+  };
 
+  afterUpdate(() => {
+    if (!location) return;
+    if (map.isMoving() || map.isZooming() || map.isRotating()) return;
+    const center = [location.lon, location.lat];
+
+    // First camera movement
+    if (location && !prevLocation) {
+      map.flyTo({ pitch: 60, zoom: 16, duration: 400, center });
+      prevLocation = location;
+      return;
+    }
+
+    // Rotate or easy to next location
+    const bearing = getBearing();
     if (bearing !== oldBearing) {
       map.rotateTo(bearing, { duration: 200 });
     } else {
-      map.easeTo({
-        pitch: 60,
-        zoom: 16,
-        duration: 0,
-        bearing,
-        center: [location.lon, location.lat]
-      });
+      map.easeTo({ pitch: 60, zoom: 16, duration: 0, bearing, center });
     }
-
     prevLocation = location;
     oldBearing = bearing;
   });

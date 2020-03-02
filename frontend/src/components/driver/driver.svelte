@@ -12,6 +12,7 @@
   import Marker from "../common/Marker.svelte";
   import MovingMarker from "../common/MovingMarker.svelte";
   import throttle from "lodash-es/throttle";
+  import once from "lodash-es/once";
   import turf from "@turf/turf";
 
   let driverLocation = { lat: 45.474507, lon: 8.994964 }; // Bareggio
@@ -20,7 +21,7 @@
   let trip = null;
   let to = null;
   let route = null;
-  $: metersPerSecond = route ? (route.distance / route.duration) * 30 : null;
+  $: metersPerSecond = route ? route.distance / route.duration : null;
   let bounds = null;
   let drivingInterval;
   let start;
@@ -42,6 +43,8 @@
     );
     webSocketConnection.onmessage = async message => {
       const data = JSON.parse(message.data);
+      console.log("data", data);
+      console.log("payload", JSON.parse(data.payload));
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
           trip = JSON.parse(data.payload);
@@ -92,7 +95,14 @@
     driverLocation = { lon, lat };
     sendLocationUpdate();
     checkWhenCloseToRider();
-    if (progressSeconds < route.duration) requestAnimationFrame(animateDriver);
+    if (progressMeter < route.distance) {
+      console.log(progressMeter, route.distance);
+      requestAnimationFrame(animateDriver);
+    }
+    if (progressMeter >= route.distance) {
+      endTrip();
+      return;
+    }
   };
 
   const checkWhenCloseToRider = throttle(() => {
@@ -101,11 +111,13 @@
       turf.point([driverLocation.lon, driverLocation.lat]),
       turf.point([from.lon, from.lat])
     );
-    if (distanceFromRider <= 0.1) {
-      console.log("startTrip");
-      webSocketConnection.send(Actions.driver.startTrip());
-    }
+    if (distanceFromRider <= 0.1) startTrip();
   }, 100);
+
+  const endTrip = () => webSocketConnection.send(Actions.driver.endTrip());
+  const startTrip = once(() =>
+    webSocketConnection.send(Actions.driver.startTrip())
+  );
 </script>
 
 <style>
