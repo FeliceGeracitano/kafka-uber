@@ -5,6 +5,7 @@
   import Actions, { ACTION_TYPE } from "../../actions";
   import BackCamera from "../common/BackCamera.svelte";
   import Button from "../common/Button.svelte";
+  import CountDown from "../common/CountDown.svelte";
   import CenterView from "../common/CenterView.svelte";
   import LineString from "../common/LineString.svelte";
   import Map from "../common/Map.svelte";
@@ -25,6 +26,7 @@
   let bounds = null;
   let drivingInterval;
   let start;
+  let timeLeftString = "0:00";
   $: tripStatus = trip ? trip.status : null;
 
   // update bounds of direction
@@ -88,6 +90,10 @@
     if (!start) start = timestamp;
     var progressSeconds = (timestamp - start) / 1000;
     var progressMeter = progressSeconds * metersPerSecond;
+    let timeLeft = route.duration - timestamp / 1000;
+    timeLeftString = `${Math.floor(timeLeft / 60)}:${Math.floor(
+      timeLeft % 60
+    )}`;
     const along = turf.along(route.geometry, progressMeter / 1000, {
       units: "kilometers"
     });
@@ -95,14 +101,8 @@
     driverLocation = { lon, lat };
     sendLocationUpdate();
     checkWhenCloseToRider();
-    if (progressMeter < route.distance) {
-      console.log(progressMeter, route.distance);
-      requestAnimationFrame(animateDriver);
-    }
-    if (progressMeter >= route.distance) {
-      endTrip();
-      return;
-    }
+    if (progressMeter < route.distance) requestAnimationFrame(animateDriver);
+    if (progressMeter >= route.distance) endTrip();
   };
 
   const checkWhenCloseToRider = throttle(() => {
@@ -118,65 +118,77 @@
   const startTrip = once(() =>
     webSocketConnection.send(Actions.driver.startTrip())
   );
+
+  const toFixedDown = coord => {
+    var re = new RegExp("(\\d+\\.\\d{" + 8 + "})(\\d)"),
+      m = coord.toString().match(re);
+    return m ? parseFloat(m[1]) : this.valueOf();
+  };
 </script>
 
 <style>
   .container {
+    flex: 1 1 auto;
     display: flex;
-    flex-direction: column;
-    margin: 1rem;
+    padding: 2rem;
+  }
+  .box {
+    flex: 1 1 auto;
+    display: flex;
     position: relative;
   }
   .title {
     padding: 0 0 1rem 0;
   }
   .map {
+    display: flex;
+    flex: 1 1 auto;
     box-shadow: 0 1px 20px 3px #0000003d;
-    height: 500px;
-    width: 500px;
   }
   .toolbar {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     position: absolute;
-    top: 50px;
+    flex: 1;
+    z-index: 99;
     width: 100%;
   }
 </style>
 
 <div class="container">
-  <div class="title">Driver</div>
-  <div class="map">
-    <Map lat={driverLocation.lat} lon={driverLocation.lon}>
+  <div class="box">
+    <div class="toolbar">
+      {#if trip && trip.status !== 'REQUESTING'}
+        <CountDown text={timeLeftString} />
+      {/if}
+      {#if trip && trip.status === 'REQUESTING'}
+        <Button label="Confirm Trip" class="btn" onClick={handleClick} />
+      {/if}
+    </div>
+    <!-- <div class="title">Driver</div> -->
+    <div class="map">
+      <Map lat={driverLocation.lat} lon={driverLocation.lon}>
 
-      {#if tripStatus !== 'CONFIRMED'}
-        <CenterView {bounds} />
-      {/if}
+        {#if tripStatus !== 'CONFIRMED'}
+          <CenterView {bounds} />
+        {/if}
 
-      {#if tripStatus === 'CONFIRMED'}
-        <BackCamera location={driverLocation} />
-      {/if}
+        {#if tripStatus === 'CONFIRMED'}
+          <BackCamera location={driverLocation} />
+        {/if}
 
-      <Marker
-        lat={driverLocation.lat}
-        lon={driverLocation.lon}
-        icon="current-location" />
-      {#if from}
-        <Marker lat={from.lat} lon={from.lon} icon="rider" />
-      {/if}
-      {#if to}
-        <Marker lat={to.lat} lon={to.lon} icon="to" />
-      {/if}
-      <LineString geometry={route ? route.geometry : null} color="#44ACB9" />
-    </Map>
-  </div>
-  <div class="toolbar">
-    {#if trip && trip.status === 'REQUESTING'}
-      <Button
-        style="position:absolute"
-        label="Confirm Trip"
-        class="btn"
-        onClick={handleClick} />
-    {/if}
+        <Marker
+          lat={toFixedDown(driverLocation.lat)}
+          lon={toFixedDown(driverLocation.lon)}
+          icon="current-location" />
+        {#if from}
+          <Marker lat={from.lat} lon={from.lon} icon="rider" />
+        {/if}
+        {#if to}
+          <Marker lat={to.lat} lon={to.lon} icon="to" />
+        {/if}
+        <LineString geometry={route ? route.geometry : null} color="#44ACB9" />
+      </Map>
+    </div>
   </div>
 </div>

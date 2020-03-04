@@ -8,7 +8,7 @@
   import LineString from "../common/LineString.svelte";
   import mapBox from "mapbox-gl";
   import { getDirections } from "../../mapbox.js";
-
+  import CountDown from "../common/CountDown.svelte";
   let location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
   const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
   let directionsGeometry = null;
@@ -72,34 +72,50 @@
 
 <style>
   .container {
-    padding: 1rem;
+    flex: 1 1 auto;
     display: flex;
-    flex-direction: column;
+    padding: 2rem;
+  }
+  .box {
+    flex: 1 1 auto;
+    display: flex;
+    position: relative;
   }
   .title {
     padding: 0 0 1rem 0;
   }
   .map {
-    width: 500px;
-    height: 500px;
+    display: flex;
+    flex: 1 1 auto;
     box-shadow: 0 1px 20px 3px #0000003d;
+  }
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    flex: 1;
+    z-index: 99;
+    width: 100%;
   }
 </style>
 
 <div class="container">
-  <div class="title">Rider</div>
-  <div class="map">
-    <Map lat={location.lat} lon={location.lon}>
-      <CenterView {bounds} />
-      {#if driver && driver.location}
-        <Marker
-          lat={driver.location.lat}
-          lon={driver.location.lon}
-          icon="driver" />
-      {/if}
-      <Marker lat={location.lat} lon={location.lon} icon="current-location" />
-      <Marker lat={destination.lat} lon={destination.lon} icon="to" />
-      <LineString geometry={directionsGeometry} color="#19C681" />
-    </Map>
+  <!-- <div class="title">Rider</div> -->
+  <div class="box">
+    <div class="toolbar" />
+    <div class="map">
+      <Map lat={location.lat} lon={location.lon}>
+        <CenterView {bounds} />
+        {#if driver && driver.location}
+          <Marker
+            lat={driver.location.lat}
+            lon={driver.location.lon}
+            icon="driver" />
+        {/if}
+        <Marker lat={location.lat} lon={location.lon} icon="current-location" />
+        <Marker lat={destination.lat} lon={destination.lon} icon="to" />
+        <LineString geometry={directionsGeometry} color="#19C681" />
+      </Map>
+    </div>
   </div>
 </div>

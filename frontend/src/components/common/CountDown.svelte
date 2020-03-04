@@ -1,15 +1,14 @@
 <script>
   import { onMount } from "svelte";
-  export let label;
-  export let onClick;
+  export let text;
 </script>
 
 <style>
-  button {
+  .count-down {
     margin: 1rem;
     box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24),
       0 17px 50px 0 rgba(0, 0, 0, 0.19);
-    background-color: #0875e1; /* Green */
+    background-color: #16965a; /* Green */
     border: none;
     color: white;
     padding: 8px 16px;
@@ -17,10 +16,10 @@
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    cursor: pointer;
     transition-duration: 0.4s;
     border-radius: 4px;
+    font-variant-numeric: tabular-nums lining-nums;
   }
 </style>
 
-<button class="button" on:click={onClick}>{label}</button>
+<div class="count-down">{text}</div>

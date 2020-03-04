@@ -28,7 +28,7 @@
 
     // First camera movement
     if (location && !prevLocation) {
-      map.flyTo({ pitch: 60, zoom: 16, duration: 400, center });
+      map.flyTo({ pitch: 60, zoom: 18, duration: 400, center });
       prevLocation = location;
       return;
     }
@@ -38,7 +38,7 @@
     if (bearing !== oldBearing) {
       map.rotateTo(bearing, { duration: 200 });
     } else {
-      map.easeTo({ pitch: 60, zoom: 16, duration: 0, bearing, center });
+      map.easeTo({ pitch: 60, zoom: 18, duration: 0, bearing, center });
     }
     prevLocation = location;
     oldBearing = bearing;
