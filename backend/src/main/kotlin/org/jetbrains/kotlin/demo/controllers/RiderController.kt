@@ -10,7 +10,6 @@ import java.util.*
 
 @Component
 class RiderController {
-
     @Autowired
     private lateinit var wsRider: WSRider
     @Autowired

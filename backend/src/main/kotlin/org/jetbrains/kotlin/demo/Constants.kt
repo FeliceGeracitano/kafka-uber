@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
-val ridersTopic = "riders"
+val RIDER_TOPIC = "riders"
+val RIDERS_TABLE = "riders_table"
 val driversTopic = "driver"
 val tripTopic = "tripTopic"
-val ridesTopic = "rides"
 val kafkaBroker = "localhost:31090"
 val DRIVERS_TABLE = "drivers_table"
 

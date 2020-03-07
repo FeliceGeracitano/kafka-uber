@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class DriverController {
-
     @Autowired
     private lateinit var wsDriver: WSDriver
     @Autowired

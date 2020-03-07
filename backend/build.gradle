@@ -23,6 +23,9 @@ jar {
 
 repositories {
     jcenter()
+    maven {
+        url = uri("https://packages.confluent.io/maven/")
+    }
 }
 
 dependencies {
@@ -30,12 +33,14 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // Required for Kotlin integration
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0"
-    compile("org.jetbrains.kotlin:kotlin-reflect")
+    compile "org.jetbrains.kotlin:kotlin-reflect"
     compile 'org.apache.httpcomponents:httpclient:4.5.11'
 
     // Kafka
     compile 'org.apache.kafka:kafka-clients:2.4.0'
     compile 'org.apache.kafka:kafka-streams:2.4.0'
+    compile 'io.confluent:kafka-streams-avro-serde:5.4.0'
+    compile 'io.confluent:kafka-schema-registry:5.4.0'
 
 
     implementation 'com.beust:klaxon:5.0.1'

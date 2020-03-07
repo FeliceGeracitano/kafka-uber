@@ -1,5 +1,7 @@
 package org.jetbrains.kotlin.demo
 
+import org.apache.avro.specific.SpecificRecord
+
 
 enum class ACTION_TYPE {
     REQUEST_TRIP,
@@ -42,3 +44,5 @@ data class Trip(
 data class Action(val type: ACTION_TYPE, val payload: String?)
 data class ConfirmRidePayload(val tripId: String, val driverLocation: Location)
 data class RequestRidePayload(val destination: Location, val riderLocation: Location)
+
+

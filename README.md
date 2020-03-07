@@ -31,13 +31,16 @@ brew install helm
 - deploy cluster
 
 ```bash
-helm install kuber cp-helm-charts -f ./values.yaml helm install --namespace kuber
+$ kubectl config set-context --current --namespace=kafka-uber
+
+$ cd ./infra
+helm install kafka-uber cp-helm-charts -f ./values.yaml
 ```
 
 - destroy cluster
 
 ```bash
-helm unistall kuber --namespace kuber ?
+helm unistall kafka-uber ?
 ```
 
 ## kafka topic
