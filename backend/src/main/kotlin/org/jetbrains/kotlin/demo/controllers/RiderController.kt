@@ -2,6 +2,8 @@ package org.jetbrains.kotlin.demo.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.jetbrains.kotlin.demo.*
+import org.jetbrains.kotlin.demo.kafka.KafkaConsumer
+import org.jetbrains.kotlin.demo.kafka.KafkaProducer
 import org.jetbrains.kotlin.demo.ws.WSRider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -14,46 +16,61 @@ class RiderController {
     private lateinit var wsRider: WSRider
     @Autowired
     private lateinit var driverCtrl: DriverController
+    @Autowired
+    private lateinit var kafkaProducer: KafkaProducer
+    @Autowired
+    private lateinit var kafkaConsumer: KafkaConsumer
 
     fun handleRequestTrip(riderId: String, riderLocation: Location, destination: Location) {
         val uuid: UUID = UUID.randomUUID()
         val tripUUID: String = uuid.toString()
         val trip = Trip(tripUUID, TripStatus.REQUESTING, null, riderId, riderLocation, destination, null)
         val rider = User(riderId, riderLocation, UserType.RIDER, tripUUID)
-        GlobalAppState.instance.trip[trip.id] = trip
-        GlobalAppState.instance.users[rider.id] = rider
+        kafkaProducer.produceRiders(rider)
+        kafkaProducer.produceTrip(trip)
         driverCtrl.notifyDrivers(rider.id, trip)
     }
 
     fun getLastTripStatus(riderId: String): Trip? {
-        val rider = GlobalAppState.instance.users[riderId]
-        return GlobalAppState.instance.trip[rider?.lastTripId]
+        val riderFromStore = kafkaConsumer.userStore?.get(riderId)
+        val driver = kafkaConsumer.userStore?.get(getDriverId(riderId))
+        val trip = kafkaConsumer.tripStore?.get(riderFromStore?.lastTripId ?: "")
+        // trip?.driver = driver
+        return trip
     }
 
     fun tripConfirmed(driverId: String) {
-        val riderId = driverId.replaceFirst("D", "R")
-        val rider = GlobalAppState.instance.users[riderId]!!
-        val trip = GlobalAppState.instance.trip[rider.lastTripId]!!
+        val riderId = getRiderId(driverId)
+        val rider = kafkaConsumer.userStore?.get(riderId)!!
+        val trip = kafkaConsumer.tripStore?.get(rider?.lastTripId ?: "")!!
         wsRider.sendMessageToRider(riderId, objectMapper.writeValueAsString(confirmTrip(trip)))
     }
 
     fun handleNewDriverLocation(driverId: String) {
-        val riderId = driverId.replaceFirst("D", "R")
-        val driver = GlobalAppState.instance.users[driverId]!!
-        wsRider.sendMessageToRider(riderId, objectMapper.writeValueAsString(driverUpdateLocation(driver)))
+        val driver = kafkaConsumer.userStore?.get(driverId)!!
+        wsRider.sendMessageToRider(getRiderId(driverId), objectMapper.writeValueAsString(driverUpdateLocation(driver)))
     }
 
     fun handleStartTrip(driverId: String) {
-        val riderId = driverId.replaceFirst("D", "R")
-        val rider = GlobalAppState.instance.users[riderId]!!
-        val trip = GlobalAppState.instance.trip[rider.lastTripId]!!
+        val riderId = getRiderId(driverId)
+        val rider = kafkaConsumer.userStore?.get(riderId)!!
+        val trip = kafkaConsumer.tripStore?.get(rider?.lastTripId ?: "")!!
         wsRider.sendMessageToRider(riderId, objectMapper.writeValueAsString(startTrip(trip)))
     }
 
     fun endTrip(driverId: String) {
-        val riderId = driverId.replaceFirst("D", "R")
-        val rider = GlobalAppState.instance.users[riderId]!!
+        val rider = kafkaConsumer.userStore?.get(getRiderId(driverId))!!
         rider.lastTripId = null
+        kafkaProducer.produceRiders(rider)
+    }
+
+    // This is an hack to reach the driver in the same browser of the driver
+    // driverId and riderId from the same browser will generate ids like: Dxxx && Rxxx
+    private fun getRiderId(driverId: String): String {
+        return driverId.replaceFirst("D", "R")
+    }
+    private fun getDriverId(riderId: String): String {
+        return riderId.replaceFirst("R", "D")
     }
 
 

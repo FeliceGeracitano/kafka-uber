@@ -21,6 +21,7 @@
 
     localRef.on("load", function() {
       map = localRef;
+      map.resize();
     });
 
     return () => {

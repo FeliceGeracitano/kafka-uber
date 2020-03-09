@@ -16,7 +16,9 @@
   import once from "lodash-es/once";
   import turf from "@turf/turf";
 
-  let driverLocation = { lat: 45.474507, lon: 8.994964 }; // Bareggio
+  let driverLocation = localStorage.getItem("driverLocation")
+    ? JSON.parse(localStorage.getItem("driverLocation"))
+    : { lat: 45.474507, lon: 8.994964 }; // Bareggio
   let webSocketConnection;
   let from = null;
   let trip = null;
@@ -45,8 +47,6 @@
     );
     webSocketConnection.onmessage = async message => {
       const data = JSON.parse(message.data);
-      console.log("data", data);
-      console.log("payload", JSON.parse(data.payload));
       switch (data.type) {
         case ACTION_TYPE.SYNC_STATUS:
           trip = JSON.parse(data.payload);
@@ -99,6 +99,7 @@
     });
     let [lon, lat] = along.geometry.coordinates;
     driverLocation = { lon, lat };
+    localStorage.setItem("driverLocation", JSON.stringify(driverLocation));
     sendLocationUpdate();
     checkWhenCloseToRider();
     if (progressMeter < route.distance) requestAnimationFrame(animateDriver);
@@ -114,16 +115,13 @@
     if (distanceFromRider <= 0.1) startTrip();
   }, 100);
 
-  const endTrip = () => webSocketConnection.send(Actions.driver.endTrip());
+  const endTrip = () => {
+    webSocketConnection.send(Actions.driver.endTrip());
+    localStorage.clear();
+  };
   const startTrip = once(() =>
     webSocketConnection.send(Actions.driver.startTrip())
   );
-
-  const toFixedDown = coord => {
-    var re = new RegExp("(\\d+\\.\\d{" + 8 + "})(\\d)"),
-      m = coord.toString().match(re);
-    return m ? parseFloat(m[1]) : this.valueOf();
-  };
 </script>
 
 <style>
@@ -178,8 +176,8 @@
         {/if}
 
         <Marker
-          lat={toFixedDown(driverLocation.lat)}
-          lon={toFixedDown(driverLocation.lon)}
+          lat={driverLocation.lat}
+          lon={driverLocation.lon}
           icon="current-location" />
         {#if from}
           <Marker lat={from.lat} lon={from.lon} icon="rider" />

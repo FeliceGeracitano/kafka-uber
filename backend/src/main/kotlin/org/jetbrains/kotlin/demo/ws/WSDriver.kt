@@ -50,7 +50,7 @@ class WSDriverConfig : WebSocketConfigurer {
         if (driverId == "") return session.close(CloseStatus(404))
         session.attributes["driverId"] = driverId;
         sessionList[driverId] = session;
-        driverController.init(driverId)
+        driverController.initDriver(driverId)
 
         // send SYNC_STATUS message
         val lastTrip = driverController.getLastTripStatus(driverId)

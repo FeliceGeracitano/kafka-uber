@@ -13,10 +13,7 @@
   let metersPerSecond = 0;
   let drivingInterval;
 
-  console.log("moving", route, lat, lon);
-
   afterUpdate(() => {
-    console.log("afterUpdate");
     if (!route || route === oldRoute) return;
     oldRoute = route;
     metersTraveled = 0;
@@ -24,7 +21,6 @@
     window.clearInterval(drivingInterval);
 
     drivingInterval = window.setInterval(() => {
-      console.log("drivingInterval");
       if (metersTraveled >= route.distance) {
         window.clearInterval(drivingInterval);
       } else {

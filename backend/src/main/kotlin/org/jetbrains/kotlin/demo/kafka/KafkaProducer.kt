@@ -10,20 +10,16 @@ import org.springframework.stereotype.Service
 import java.util.*
 import javax.annotation.PostConstruct
 
-class KafkaProducer() {
 
+@Service
+class KafkaProducer {
     private val producer = createProducer()
 
 
-
-    @PostConstruct
-    fun init() {
-        print("KafkaProducer init")
-    }
-
     private fun createProducer(): Producer<String, String> {
         val props = Properties()
-        props["bootstrap.servers"] = kafkaBroker
+        props["bootstrap.servers"] = KAFKA_BROKER
+        props["application.id"] = "kafka-uber-producer"
         props["key.serializer"] = StringSerializer::class.java
         props["value.serializer"] = StringSerializer::class.java
         return KafkaProducer<String, String>(props)
@@ -35,14 +31,14 @@ class KafkaProducer() {
     }
 
     fun produceTrip(trip: Trip) {
-        produce(tripTopic, trip.id,  Klaxon().toJsonString(trip))
+        produce(TRIP_TOPIC, trip.id, Klaxon().toJsonString(trip))
     }
 
     fun produceRiders(rider: User) {
-        produce(ridersTopic, rider.id,  Klaxon().toJsonString(rider))
+        produce(USER_TOPIC, rider.id, Klaxon().toJsonString(rider))
     }
 
     fun produceDriver(driver: User) {
-        produce(driversTopic, driver.id,  Klaxon().toJsonString(driver))
+        produce(USER_TOPIC, driver.id, Klaxon().toJsonString(driver))
     }
 }

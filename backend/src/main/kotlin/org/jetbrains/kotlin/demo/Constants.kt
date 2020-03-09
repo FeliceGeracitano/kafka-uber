@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
-val RIDER_TOPIC = "riders"
-val RIDERS_TABLE = "riders_table"
-val driversTopic = "driver"
-val tripTopic = "tripTopic"
-val kafkaBroker = "localhost:31090"
-val DRIVERS_TABLE = "drivers_table"
+val USER_TOPIC = "user_topic"
+val USER_TABLE = "user_table"
+val TRIP_TOPIC = "trip_topic"
+val TRIP_TABLE = "trip_table"
+val KAFKA_BROKER = "localhost:9092"
+val APPLICATION_ID = "kafka_uber_demo"
 
 
 fun parseURlQuery(query: String): Map<String, String> = query

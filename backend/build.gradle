@@ -40,7 +40,7 @@ dependencies {
     compile 'org.apache.kafka:kafka-clients:2.4.0'
     compile 'org.apache.kafka:kafka-streams:2.4.0'
     compile 'io.confluent:kafka-streams-avro-serde:5.4.0'
-    compile 'io.confluent:kafka-schema-registry:5.4.0'
+    //compile 'io.confluent:kafka-schema-registry:5.4.0'
 
 
     implementation 'com.beust:klaxon:5.0.1'
