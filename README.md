@@ -19,6 +19,15 @@ git clone --recurse-submodules https://github.com/FeliceGeracitano/kafka-uber.gi
 
 ### infra
 
+```
+$ cd git/examples/cp-all-in-one
+$ docker-compose up
+```
+
+> dashboard running at: http://localhost:9021/
+
+#### deprecated
+
 - kubernetes?
 - kafka
 - dependecies:

@@ -8,7 +8,6 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.jetbrains.kotlin.demo.*
 import org.springframework.stereotype.Service
 import java.util.*
-import javax.annotation.PostConstruct
 
 
 @Service

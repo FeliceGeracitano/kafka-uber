@@ -31,7 +31,6 @@ class DriverController {
     fun confirmTrip(driverId: String, tripId: String, driverLocation: Location) {
 
         // Update Driver
-
         updateLocation(driverId, driverLocation)
         var driver = kafkaConsumer.userStore?.get(driverId)!!
         driver.lastTripId = tripId

@@ -31,7 +31,7 @@ class WSDriverConfig : WebSocketConfigurer {
 
 
 @Controller
-    class WSDriver : TextWebSocketHandler() {
+class WSDriver : TextWebSocketHandler() {
     private val sessionList = mutableMapOf<String, WebSocketSession>();
     private val jsonParser = Klaxon()
 
@@ -46,25 +46,33 @@ class WSDriverConfig : WebSocketConfigurer {
     @Throws(Exception::class)
     override fun afterConnectionEstablished(session: WebSocketSession) {
         val parameters = parseURlQuery(session.uri.query)
-        val driverId = parameters["driverId"] ?: "";
+        val driverId = parameters["driverId"] ?: ""
         if (driverId == "") return session.close(CloseStatus(404))
-        session.attributes["driverId"] = driverId;
-        sessionList[driverId] = session;
+        session.attributes["driverId"] = driverId
+        sessionList[driverId] = session
         driverController.initDriver(driverId)
 
         // send SYNC_STATUS message
         val lastTrip = driverController.getLastTripStatus(driverId)
         if (lastTrip !== null) {
-            session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(
-                Action(ACTION_TYPE.SYNC_STATUS, jacksonObjectMapper().writeValueAsString(lastTrip))
-            )))
+            session.sendMessage(
+                TextMessage(
+                    jacksonObjectMapper().writeValueAsString(
+                        Action(ACTION_TYPE.SYNC_STATUS, jacksonObjectMapper().writeValueAsString(lastTrip))
+                    )
+                )
+            )
         }
 
         // send REQUEST_TRIP message
         val requestingTrip = driverController.getPendingRequests(driverId) ?: return
-        session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(
-            Action(ACTION_TYPE.REQUEST_TRIP, jacksonObjectMapper().writeValueAsString(requestingTrip))
-        )))
+        session.sendMessage(
+            TextMessage(
+                jacksonObjectMapper().writeValueAsString(
+                    Action(ACTION_TYPE.REQUEST_TRIP, jacksonObjectMapper().writeValueAsString(requestingTrip))
+                )
+            )
+        )
 
     }
 
@@ -74,7 +82,6 @@ class WSDriverConfig : WebSocketConfigurer {
         val jsonString = textMessage?.payload.toString()
         val action = jsonParser.parse<Action>(jsonString) as Action
         val driverId = session?.attributes?.get("driverId") as String
-
         when (action?.type) {
             ACTION_TYPE.CONFIRM_TRIP -> {
                 if (action.payload == null) throw Error("Missing Location Payload")
@@ -89,6 +96,7 @@ class WSDriverConfig : WebSocketConfigurer {
             ACTION_TYPE.START_TRIP -> driverController.startTrip(driverId)
             ACTION_TYPE.END_TRIP -> driverController.endTrip(driverId)
         }
+
     }
 
     private fun emit(session: WebSocketSession, msg: Action) =

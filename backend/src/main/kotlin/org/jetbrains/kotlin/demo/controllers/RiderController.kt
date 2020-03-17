@@ -22,6 +22,7 @@ class RiderController {
     private lateinit var kafkaConsumer: KafkaConsumer
 
     fun handleRequestTrip(riderId: String, riderLocation: Location, destination: Location) {
+
         val uuid: UUID = UUID.randomUUID()
         val tripUUID: String = uuid.toString()
         val trip = Trip(tripUUID, TripStatus.REQUESTING, null, riderId, riderLocation, destination, null)
@@ -29,6 +30,7 @@ class RiderController {
         kafkaProducer.produceRiders(rider)
         kafkaProducer.produceTrip(trip)
         driverCtrl.notifyDrivers(rider.id, trip)
+
     }
 
     fun getLastTripStatus(riderId: String): Trip? {

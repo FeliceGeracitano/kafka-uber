@@ -30,7 +30,12 @@ enum class UserType {
 
 
 data class Location(val lat: Double, val lon: Double)
-data class User(val id: String, var location: Location?, val type: UserType, var lastTripId: String?)
+data class User(
+    val id: String,
+    var location: Location?,
+    val type: UserType,
+    var lastTripId: String?)
+
 data class Trip(
     val id: String,
     var status: TripStatus,
