@@ -80,9 +80,9 @@ class WSDriver : TextWebSocketHandler() {
     @Throws(Exception::class)
     public override fun handleTextMessage(session: WebSocketSession?, textMessage: TextMessage?) {
         val jsonString = textMessage?.payload.toString()
-        val action = jsonParser.parse<Action>(jsonString) as Action
         val driverId = session?.attributes?.get("driverId") as String
-        when (action?.type) {
+        val action: Action = try { jsonParser.parse<Action>(jsonString)!! } catch (_: java.lang.Exception) { return }
+        when (action.type) {
             ACTION_TYPE.CONFIRM_TRIP -> {
                 if (action.payload == null) throw Error("Missing Location Payload")
                 val payload = jsonParser.parse<ConfirmRidePayload>(action.payload) as ConfirmRidePayload

@@ -9,8 +9,8 @@ val USER_TOPIC = "user_topic"
 val USER_TABLE = "user_table"
 val TRIP_TOPIC = "trip_topic"
 val TRIP_TABLE = "trip_table"
+val TRIP_KTABLE = "trip_Ktable"
 val KAFKA_BROKER = "localhost:9092"
-val APPLICATION_ID = "kafka_uber_demo"
 
 
 fun parseURlQuery(query: String): Map<String, String> = query

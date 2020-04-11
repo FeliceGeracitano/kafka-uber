@@ -1,127 +1,122 @@
 <script lang="ts">
-  import { getDirections } from "../../mapbox.js";
-  import { getUid } from "../../utils";
-  import { onMount } from "svelte";
-  import Actions, { ACTION_TYPE } from "../../actions";
-  import BackCamera from "../common/BackCamera.svelte";
-  import Button from "../common/Button.svelte";
-  import CountDown from "../common/CountDown.svelte";
-  import CenterView from "../common/CenterView.svelte";
-  import LineString from "../common/LineString.svelte";
-  import Map from "../common/Map.svelte";
-  import mapBox from "mapbox-gl";
-  import Marker from "../common/Marker.svelte";
-  import MovingMarker from "../common/MovingMarker.svelte";
-  import throttle from "lodash-es/throttle";
-  import once from "lodash-es/once";
-  import turf from "@turf/turf";
+  import turf from '@turf/turf'
+  import throttle from 'lodash-es/throttle'
+  import once from 'lodash-es/once'
+  import MovingMarker from '../common/MovingMarker.svelte'
+  import Marker from '../common/Marker.svelte'
+  import mapBox from 'mapbox-gl'
+  import Map from '../common/Map.svelte'
+  import LineString from '../common/LineString.svelte'
+  import CountDown from '../common/CountDown.svelte'
+  import CenterView from '../common/CenterView.svelte'
+  import Button from '../common/Button.svelte'
+  import BackCamera from '../common/BackCamera.svelte'
+  import Actions, { ACTION_TYPE } from '../../actions'
+  import { webSocket } from 'rxjs/webSocket'
+  import { TAXI_INIT_LOCATION, noop, CAMERA } from '../../constants.js'
+  import { pipe, identity, filter, pathEq, or } from 'ramda'
+  import { onMount } from 'svelte'
+  import { getUid } from '../../utils'
+  import { getDirections } from '../../mapbox.js'
 
-  let driverLocation = localStorage.getItem("driverLocation")
-    ? JSON.parse(localStorage.getItem("driverLocation"))
-    : { lat: 45.474507, lon: 8.994964 }; // Bareggio
-  let webSocketConnection;
-  let from = null;
-  let trip = null;
-  let to = null;
-  let route = null;
-  $: metersPerSecond = route ? route.distance / route.duration : null;
-  let bounds = null;
-  let drivingInterval;
-  let start;
-  let timeLeftString = "0:00";
-  $: tripStatus = trip ? trip.status : null;
-
-  // update bounds of direction
+  let driverLocation = TAXI_INIT_LOCATION
+  let webSocket$
+  let trip = null
+  let route = null
+  let bounds = null
+  let drivingInterval
+  let start
+  let timeLeftString = '0:00'
+  const speed = 4
+  $: tripDuration = route ? route.duration / speed : 0
+  $: metersPerSecond = route ? route.distance / tripDuration : null
+  $: distance = route ? route.distance : 0
+  $: tripStatus = trip ? trip.status : null
+  $: riderLocation = tripStatus === 'STARTED' ? driverLocation : trip && trip.from ? trip.from : null
   $: if (route && route.geometry && route.geometry.coordinates.length) {
-    const coordinates = route.geometry.coordinates;
+    const coordinates = route.geometry.coordinates
     bounds = coordinates.reduce(
       (bounds, coord) => bounds.extend(coord),
       new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0)
-    );
+    )
+  }
+  $: cameraMode = ['STARTED', 'CONFIRMED'].includes(tripStatus) ? CAMERA.BACK : CAMERA.CENTER
+
+  const msgHandlers = {
+    [ACTION_TYPE.SYNC_STATUS]: async msg => {
+      trip = JSON.parse(msg.payload)
+      if (trip.status !== 'CONFIRMED') return
+      await fetchDirections()
+      animateDriver(0)
+    },
+    [ACTION_TYPE.REQUEST_TRIP]: async msg => {
+      trip = JSON.parse(msg.payload)
+      if (!trip) return
+      await fetchDirections()
+    },
+    [ACTION_TYPE.START_TRIP]: async msg => {
+      trip = JSON.parse(msg.payload)
+    }
   }
 
   onMount(async () => {
-    const driverId = getUid("DRIVER");
-    webSocketConnection = new WebSocket(
-      `ws://localhost:8080/ws-driver/websocket?driverId=${driverId}`
-    );
-    webSocketConnection.onmessage = async message => {
-      const data = JSON.parse(message.data);
-      switch (data.type) {
-        case ACTION_TYPE.SYNC_STATUS:
-          trip = JSON.parse(data.payload);
-          if (trip.status !== "CONFIRMED") return;
-          await fetchDirections();
-          animateDriver(0);
-          break;
-
-        case ACTION_TYPE.REQUEST_TRIP:
-          trip = JSON.parse(data.payload);
-          if (!trip) return;
-          await fetchDirections();
-          break;
-
-        default:
-          break;
-      }
-    };
-  });
+    webSocket$ = webSocket(`ws://localhost:8080/ws-driver/websocket?driverId=${getUid('DRIVER')}`)
+    webSocket$
+      .multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.SYNC_STATUS))
+      .subscribe(msgHandlers[ACTION_TYPE.SYNC_STATUS])
+    webSocket$
+      .multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.REQUEST_TRIP))
+      .subscribe(msgHandlers[ACTION_TYPE.REQUEST_TRIP])
+    webSocket$
+      .multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.START_TRIP))
+      .subscribe(msgHandlers[ACTION_TYPE.START_TRIP])
+  })
 
   const sendLocationUpdate = throttle(() => {
-    webSocketConnection.send(Actions.driver.updateLocation(driverLocation));
-  }, 1000);
+    webSocket$.next(Actions.driver.updateLocation(driverLocation))
+  }, 1000)
 
   const handleClick = () => {
-    webSocketConnection.send(
-      Actions.driver.confirmTrip(trip.id, driverLocation)
-    );
-    trip = { ...trip, status: "CONFIRMED" };
-    animateDriver(0);
-  };
+    webSocket$.next(Actions.driver.confirmTrip(trip.id, driverLocation))
+    trip = { ...trip, status: 'CONFIRMED' }
+    animateDriver(0)
+  }
 
   const fetchDirections = async () => {
-    const direction = await getDirections(driverLocation, trip.from, trip.to);
-    from = trip.from;
-    to = trip.to;
-    route = direction.routes[0];
-  };
+    const direction = await getDirections(driverLocation, trip.from, trip.to)
+    route = direction.routes[0]
+  }
 
-  const animateDriver = timestamp => {
-    if (!start) start = timestamp;
-    var progressSeconds = (timestamp - start) / 1000;
-    var progressMeter = progressSeconds * metersPerSecond;
-    let timeLeft = route.duration - timestamp / 1000;
-    timeLeftString = `${Math.floor(timeLeft / 60)}:${Math.floor(
-      timeLeft % 60
-    )}`;
-    const along = turf.along(route.geometry, progressMeter / 1000, {
-      units: "kilometers"
-    });
-    let [lon, lat] = along.geometry.coordinates;
-    driverLocation = { lon, lat };
-    localStorage.setItem("driverLocation", JSON.stringify(driverLocation));
-    sendLocationUpdate();
-    checkWhenCloseToRider();
-    if (progressMeter < route.distance) requestAnimationFrame(animateDriver);
-    if (progressMeter >= route.distance) endTrip();
-  };
+  const animateDriver = async timestamp => {
+    if (!start) start = timestamp
+    var progressSeconds = (timestamp - start) / 1000
+    var progressMeter = progressSeconds * metersPerSecond
+    let timeLeft = tripDuration - timestamp / 1000
+    timeLeftString = `${Math.floor(timeLeft / 60)}:${Math.floor(timeLeft % 60)}`
+    const along = turf.along(route.geometry, progressMeter / 1000, { units: 'kilometers' })
+    let [lon, lat] = along.geometry.coordinates
+    driverLocation = { lon, lat }
+    sendLocationUpdate()
+    checkWhenCloseToRider()
+    if (progressMeter < distance) requestAnimationFrame(animateDriver)
+    if (progressMeter >= distance) endTrip()
+  }
 
   const checkWhenCloseToRider = throttle(() => {
-    if (trip.status !== "CONFIRMED") return;
+    if (trip.status !== 'CONFIRMED') return
     const distanceFromRider = turf.distance(
       turf.point([driverLocation.lon, driverLocation.lat]),
-      turf.point([from.lon, from.lat])
-    );
-    if (distanceFromRider <= 0.1) startTrip();
-  }, 100);
-
+      turf.point([trip.from.lon, trip.from.lat])
+    )
+    if (distanceFromRider <= 0.02) startTrip()
+  }, 50)
   const endTrip = () => {
-    webSocketConnection.send(Actions.driver.endTrip());
-    localStorage.clear();
-  };
-  const startTrip = once(() =>
-    webSocketConnection.send(Actions.driver.startTrip())
-  );
+    webSocket$.send(Actions.driver.endTrip())
+    localStorage.clear()
+  }
+  const startTrip = once(() => {
+    webSocket$.next(Actions.driver.startTrip())
+  })
 </script>
 
 <style>
@@ -135,9 +130,7 @@
     display: flex;
     position: relative;
   }
-  .title {
-    padding: 0 0 1rem 0;
-  }
+
   .map {
     display: flex;
     flex: 1 1 auto;
@@ -163,27 +156,23 @@
         <Button label="Confirm Trip" class="btn" onClick={handleClick} />
       {/if}
     </div>
-    <!-- <div class="title">Driver</div> -->
     <div class="map">
       <Map lat={driverLocation.lat} lon={driverLocation.lon}>
 
-        {#if tripStatus !== 'CONFIRMED'}
+        {#if cameraMode === CAMERA.CENTER}
           <CenterView {bounds} />
         {/if}
 
-        {#if tripStatus === 'CONFIRMED'}
+        {#if cameraMode === CAMERA.BACK}
           <BackCamera location={driverLocation} />
         {/if}
 
-        <Marker
-          lat={driverLocation.lat}
-          lon={driverLocation.lon}
-          icon="current-location" />
-        {#if from}
-          <Marker lat={from.lat} lon={from.lon} icon="rider" />
+        <Marker lat={driverLocation.lat} lon={driverLocation.lon} icon="current-location" />
+        {#if riderLocation}
+          <Marker lat={riderLocation.lat} lon={riderLocation.lon} icon="rider" />
         {/if}
-        {#if to}
-          <Marker lat={to.lat} lon={to.lon} icon="to" />
+        {#if trip && trip.to}
+          <Marker lat={trip.to.lat} lon={trip.to.lon} icon="to" />
         {/if}
         <LineString geometry={route ? route.geometry : null} color="#44ACB9" />
       </Map>

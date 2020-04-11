@@ -1,6 +1,7 @@
 package org.jetbrains.kotlin.demo.kafka
 
-import org.apache.kafka.clients.admin.*
+import org.apache.kafka.clients.admin.KafkaAdminClient
+import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
@@ -11,7 +12,11 @@ import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.state.QueryableStoreTypes
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore
 import org.jetbrains.kotlin.demo.*
-import org.jetbrains.kotlin.demo.serde.*
+import org.jetbrains.kotlin.demo.controllers.DriverController
+import org.jetbrains.kotlin.demo.controllers.RiderController
+import org.jetbrains.kotlin.demo.serde.TripSerde
+import org.jetbrains.kotlin.demo.serde.UserSerde
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.annotation.PostConstruct
@@ -19,12 +24,17 @@ import javax.annotation.PostConstruct
 
 @Service
 class KafkaConsumer {
-    // @Autowired
-    // private lateinit var riderCtrl: RiderController
+
+    @Autowired
+    private lateinit var riderCtrl: RiderController
+    @Autowired
+    private lateinit var driverCtrl: DriverController
     var streams: KafkaStreams? = null
     var userStore: ReadOnlyKeyValueStore<String, User>? = null
     var tripStore: ReadOnlyKeyValueStore<String, Trip>? = null
+
     val kafkaProps = Properties()
+
     init {
         kafkaProps[StreamsConfig.BOOTSTRAP_SERVERS_CONFIG] = KAFKA_BROKER
         kafkaProps[StreamsConfig.APPLICATION_ID_CONFIG] = "kafka-uber-consumer"
@@ -35,7 +45,7 @@ class KafkaConsumer {
     @PostConstruct
     fun run() {
         createTopics()
-        buildStrems()
+        buildStreams()
     }
 
     fun createTopics() {
@@ -49,52 +59,49 @@ class KafkaConsumer {
         }
     }
 
-
-    fun buildStrems() {
+    fun buildStreams() {
         val streamsBuilder = StreamsBuilder()
 
         val userStream: KStream<String, User> = streamsBuilder
             .stream(USER_TOPIC, Consumed.with(Serdes.String(), UserSerde()))
 
+        val driversStream = userStream.filter { _, user -> user.type === UserType.DRIVER }
+
         val tripStream: KStream<String, Trip> = streamsBuilder
             .stream(TRIP_TOPIC, Consumed.with(Serdes.String(), TripSerde()))
-        tripStream.foreach { key, trip ->
-            println("[KafkaConsumer] [tripStream]: $trip")
-        }
 
         userStream.groupByKey().reduce({ _, new -> new }, Materialized.`as`(USER_TABLE))
         tripStream.groupByKey().reduce({ _, new -> new }, Materialized.`as`(TRIP_TABLE))
 
-//
-//        userStream
-//            .filter { key, _ -> key.startsWith("D") }
-//            .groupByKey()
-//            .windowedBy(TimeWindows.of(Duration.ofSeconds(3)).grace(Duration.ZERO))
-//            .reduce { value1, value2 -> value2  }
-//            .suppress(untilWindowCloses(Suppressed.BufferConfig.unbounded()))
-//            .toStream()
-//            .foreach { key, user ->
-//                val _key = key.key()
-//                println("[windowedBy]: $_key $user")
-//                riderCtrl?.handleNewDriverLocation(key.key())
-//            }
+//        streamsBuilder.globalTable(
+//            TRIP_TOPIC,
+//            Materialized.`as`<String, Trip, KeyValueStore<Bytes, ByteArray>>(TRIP_TABLE)
+//                .withKeySerde(Serdes.String())
+//                .withValueSerde(TripSerde())
+//        )
+
+        driversStream
+            .foreach { key, _ ->
+                riderCtrl?.handleNewDriverLocation(key)
+            }
+
+        tripStream
+            .foreach { _, trip ->
+                riderCtrl?.handleTripUpdate(trip)
+                driverCtrl?.handleTripUpdate(trip)
+            }
 
         val topology = streamsBuilder.build()
-
         streams = KafkaStreams(topology, kafkaProps)
         streams!!.cleanUp()
         streams!!.start()
 
-        var waiting = true
-        while (waiting) {
+        while (streams!!.state() !== KafkaStreams.State.RUNNING) {
             try {
-                Thread.sleep(1000)
+                Thread.sleep(2000)
                 userStore = streams?.store(USER_TABLE, QueryableStoreTypes.keyValueStore<String, User>())
                 tripStore = streams?.store(TRIP_TABLE, QueryableStoreTypes.keyValueStore<String, Trip>())
-                waiting = false
             } catch (ex: Exception) {
-                println("Stores NOT ready keep waiting...")
-                println(ex)
             }
         }
 
@@ -109,5 +116,4 @@ class KafkaConsumer {
     fun getTrip(tripId: String): Trip? {
         return tripStore?.get(tripId)
     }
-
 }

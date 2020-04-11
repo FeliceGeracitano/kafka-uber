@@ -1,14 +1,16 @@
 // https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
 function uuidv4() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+      v = c == 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
 }
 
 // key = 'DRIVER' | 'RIDER'
-export const getUid = key => {
-  if (!localStorage.getItem("UID")) localStorage.setItem("UID", uuidv4());
-  return `${key.charAt(0)}${localStorage.getItem("UID")}`;
-};
+let uuid
+export const getUid = (key) => {
+  uuid = uuid ? uuid : uuidv4()
+  // if (!localStorage.getItem("UID")) localStorage.setItem("UID", uuidv4());
+  return `${key.charAt(0)}${uuid}`
+}

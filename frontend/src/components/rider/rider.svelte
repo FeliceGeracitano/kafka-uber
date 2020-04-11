@@ -1,73 +1,63 @@
 <script>
-  import { onMount } from "svelte";
-  import Map from "../common/Map.svelte";
-  import Marker from "../common/Marker.svelte";
-  import CenterView from "../common/CenterView.svelte";
-  import { getUid } from "../../utils";
-  import Actions, { ACTION_TYPE } from "../../actions";
-  import LineString from "../common/LineString.svelte";
-  import mapBox from "mapbox-gl";
-  import { getDirections } from "../../mapbox.js";
-  import CountDown from "../common/CountDown.svelte";
-  let location = { lat: 45.488561, lon: 9.020773 }; // Cornaredo
-  const destination = { lat: 45.505203, lon: 9.093253 }; // Molino dorino
-  let directionsGeometry = null;
+  import Marker from '../common/Marker.svelte'
+  import mapBox from 'mapbox-gl'
+  import Map from '../common/Map.svelte'
+  import LineString from '../common/LineString.svelte'
+  import CountDown from '../common/CountDown.svelte'
+  import CenterView from '../common/CenterView.svelte'
+  import Actions, { ACTION_TYPE } from '../../actions'
+  import { webSocket } from 'rxjs/webSocket'
+  import { RIDER_INIT_LOCATION, TRIP_DESTINATION } from '../../constants.js'
+  import { pipe, identity, filter, pathEq, or } from 'ramda'
+  import { onMount } from 'svelte'
+  import { getUid } from '../../utils'
+  import { getDirections } from '../../mapbox.js'
 
-  let trip;
-  let driver = {};
-  let bounds;
+  let riderLocation = RIDER_INIT_LOCATION
+  const destination = TRIP_DESTINATION
+  let directionsGeometry = null
+  let webSocket$
+  let trip
+  let driver = {}
+  let bounds
+  const noop = () => {}
 
   $: if (directionsGeometry && directionsGeometry.coordinates.length) {
-    const coordinates = directionsGeometry.coordinates;
+    const coordinates = directionsGeometry.coordinates
     bounds = coordinates
       .filter(Boolean)
-      .reduce(
-        (bounds, cord) => bounds.extend(cord),
-        new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0)
-      );
-    if (driver && driver.location)
-      bounds.extend([driver.location.lon, driver.location.lat]);
+      .reduce((bounds, cord) => bounds.extend(cord), new mapBox.LngLatBounds(coordinates[0] || 0, coordinates[0] || 0))
+    if (driver && driver.location) bounds.extend([driver.location.lon, driver.location.lat])
+  }
+
+  const msgHandlers = {
+    handleSyncStatus: async msg => {
+      trip = JSON.parse(msg.payload)
+      const direction = await getDirections(riderLocation, destination)
+      directionsGeometry = direction.routes[0].geometry
+      if (trip) driver = trip.driver
+      if (!trip) webSocket$.next(Actions.rider.requestTrip(riderLocation, destination))
+    },
+    handleNewDriverLocation: async msg => {
+      driver = JSON.parse(msg.payload)
+      if (trip && trip.status === 'STARTED') {
+        riderLocation = driver.location
+      }
+    },
+    handleUpdateTrip: async msg => {
+      trip = JSON.parse(msg.payload)
+    }
   }
 
   onMount(async () => {
-    const riderId = getUid("RIDER");
-    const webSocketConnection = new WebSocket(
-      `ws://localhost:8080/ws-rider/websocket?riderId=${riderId}`
-    );
-
-    webSocketConnection.onmessage = async message => {
-      const data = JSON.parse(message.data);
-      switch (data.type) {
-        case ACTION_TYPE.SYNC_STATUS:
-          trip = JSON.parse(data.payload);
-          if (trip) {
-            const direction = await getDirections(location, trip.to);
-            directionsGeometry = direction.routes[0].geometry;
-            driver = trip.driver;
-            return;
-          }
-          const direction = await getDirections(location, destination);
-          directionsGeometry = direction.routes[0].geometry;
-          webSocketConnection.send(
-            Actions.rider.requestTrip(location, destination)
-          );
-          break;
-        case ACTION_TYPE.CONFIRM_TRIP:
-          trip = JSON.parse(data.payload);
-          // driver confirmed, show driver car
-          break;
-        case ACTION_TYPE.UPDATE_DRIVER_LOCATION:
-          driver = JSON.parse(data.payload);
-          if (trip && trip.status === "STARTED") location = driver.location;
-          break;
-        case ACTION_TYPE.START_TRIP:
-          trip = JSON.parse(data.payload);
-          break;
-        default:
-          break;
-      }
-    };
-  });
+    webSocket$ = webSocket(`ws://localhost:8080/ws-rider/websocket?riderId=${getUid('RIDER')}`)
+    webSocket$.multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.SYNC_STATUS)).subscribe(msgHandlers.handleSyncStatus)
+    webSocket$
+      .multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.UPDATE_DRIVER_LOCATION))
+      .subscribe(msgHandlers.handleNewDriverLocation)
+    webSocket$.multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.START_TRIP)).subscribe(msgHandlers.handleUpdateTrip)
+    webSocket$.multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.CONFIRM_TRIP)).subscribe(msgHandlers.handleUpdateTrip)
+  })
 </script>
 
 <style>
@@ -81,9 +71,7 @@
     display: flex;
     position: relative;
   }
-  .title {
-    padding: 0 0 1rem 0;
-  }
+
   .map {
     display: flex;
     flex: 1 1 auto;
@@ -100,19 +88,15 @@
 </style>
 
 <div class="container">
-  <!-- <div class="title">Rider</div> -->
   <div class="box">
     <div class="toolbar" />
     <div class="map">
-      <Map lat={location.lat} lon={location.lon}>
+      <Map lat={riderLocation.lat} lon={riderLocation.lon}>
         <CenterView {bounds} />
+        <Marker lat={riderLocation.lat} lon={riderLocation.lon} icon="current-location" />
         {#if driver && driver.location}
-          <Marker
-            lat={driver.location.lat}
-            lon={driver.location.lon}
-            icon="driver" />
+          <Marker lat={driver.location.lat} lon={driver.location.lon} icon="driver" />
         {/if}
-        <Marker lat={location.lat} lon={location.lon} icon="current-location" />
         <Marker lat={destination.lat} lon={destination.lon} icon="to" />
         <LineString geometry={directionsGeometry} color="#19C681" />
       </Map>

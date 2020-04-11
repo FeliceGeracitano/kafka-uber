@@ -64,9 +64,8 @@ class WSRider : TextWebSocketHandler() {
     public override fun handleTextMessage(session: WebSocketSession?, textMessage: TextMessage?) {
         val jsonString = textMessage?.payload.toString()
         val riderId = session?.attributes?.get("riderId") as String
-        val action = jsonParser.parse<Action>(jsonString) as Action
+        val action: Action = try { jsonParser.parse<Action>(jsonString)!! } catch (_: java.lang.Exception) { return }
         if (action.payload == null) throw Error("Missing Location Payload")
-
             when (action?.type) {
                 ACTION_TYPE.REQUEST_TRIP -> {
                 val (destination, riderLocation) = jsonParser.parse<RequestRidePayload>(action.payload) as RequestRidePayload
@@ -78,14 +77,10 @@ class WSRider : TextWebSocketHandler() {
 
     private fun emit(session: WebSocketSession, msg: Action) =
         session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
-//    fun broadcast(msg: Message) = sessionList.forEach { emit(it.key, msg) }
-//    fun broadcastToOthers(me: WebSocketSession, msg: Message) =
-//        sessionList.filterNot { it.key == me }.forEach { emit(it.key, msg) }
 
     public fun sendMessageToRider(riderId: String, msg: String) {
         val session = sessionList[riderId]
         if (session === null || !session.isOpen) return
         session?.sendMessage(TextMessage(msg))
     }
-
 }

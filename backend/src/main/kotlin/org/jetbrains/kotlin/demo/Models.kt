@@ -12,7 +12,8 @@ enum class ACTION_TYPE {
     START_TRIP,
     END_TRIP,
 
-    SYNC_STATUS
+    SYNC_STATUS,
+    EMPTY
 }
 
 

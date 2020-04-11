@@ -29,7 +29,6 @@ class DriverController {
     }
 
     fun confirmTrip(driverId: String, tripId: String, driverLocation: Location) {
-
         // Update Driver
         updateLocation(driverId, driverLocation)
         var driver = kafkaConsumer.userStore?.get(driverId)!!
@@ -42,13 +41,12 @@ class DriverController {
         trip.driverId = driverId
         trip.status = TripStatus.CONFIRMED
         kafkaProducer.produceTrip(trip)
-        riderCtrl.tripConfirmed(driverId)
     }
 
     fun updateLocation(driverId: String, location: Location) {
         var driver = kafkaConsumer.userStore?.get(driverId)!!
         driver.location = location
-        riderCtrl.handleNewDriverLocation(driverId)
+        // riderCtrl.handleNewDriverLocation(driverId)
         kafkaProducer.produceDriver(driver)
     }
 
@@ -57,7 +55,6 @@ class DriverController {
         val trip = kafkaConsumer.tripStore?.get(driver.lastTripId)!!
         trip.status = TripStatus.STARTED
         kafkaProducer.produceTrip(trip)
-        riderCtrl.handleStartTrip(driverId)
     }
 
     fun endTrip(driverId: String) {
@@ -71,8 +68,6 @@ class DriverController {
         // Update Driver
         driver?.lastTripId = null
         kafkaProducer.produceDriver(driver)
-
-        riderCtrl.endTrip(driverId)
     }
 
     fun getLastTripStatus(driverId: String): Trip? {
@@ -92,10 +87,17 @@ class DriverController {
         // driverId and riderId from the same browser will generate ids like: Dxxx && Rxxx
         val driverId = riderId.replaceFirst("R", "D")
         wsDriver.sendMessage(driverId, RiderController.objectMapper.writeValueAsString(
-            RiderController.requestRideAction(
-                trip
-            )
+            RiderController.tripUpdate(trip)
         ))
+    }
+
+
+    fun handleTripUpdate(trip: Trip) {
+        if (!::kafkaConsumer.isInitialized || trip.driverId == null) return;
+        wsDriver.sendMessage(
+            trip.driverId!!,
+            RiderController.objectMapper.writeValueAsString(RiderController.tripUpdate(trip))
+        )
     }
 
     // This is an hack to reach the driver in the same browser of the driver
