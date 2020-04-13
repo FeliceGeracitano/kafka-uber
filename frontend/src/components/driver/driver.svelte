@@ -73,6 +73,7 @@
   })
 
   const sendLocationUpdate = throttle(() => {
+    console.log('sendLocationUpdate', driverLocation)
     webSocket$.next(Actions.driver.updateLocation(driverLocation))
   }, 1000)
 

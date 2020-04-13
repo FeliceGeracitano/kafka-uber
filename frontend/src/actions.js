@@ -9,9 +9,9 @@ export const ACTION_TYPE = {
 
 export default {
   rider: {
-    requestTrip: (from, to) => ({
+    requestTrip: ({ from, to }) => ({
       type: ACTION_TYPE.REQUEST_TRIP,
-      payload: JSON.stringify({ destination: from, riderLocation: to })
+      payload: JSON.stringify({ riderLocation: from, destination: to })
     })
   },
   driver: {

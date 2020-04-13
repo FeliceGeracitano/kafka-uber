@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    stream:
+      bindings:
+        ouput_user:
+          destination: user_topic
+        ouput_trip:
+          destination: trip_topic
+        input_user:
+          destination: user_topic
+        input_trip:
+          destination: trip_topic
+
+

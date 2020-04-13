@@ -73,12 +73,6 @@ class KafkaConsumer {
         userStream.groupByKey().reduce({ _, new -> new }, Materialized.`as`(USER_TABLE))
         tripStream.groupByKey().reduce({ _, new -> new }, Materialized.`as`(TRIP_TABLE))
 
-//        streamsBuilder.globalTable(
-//            TRIP_TOPIC,
-//            Materialized.`as`<String, Trip, KeyValueStore<Bytes, ByteArray>>(TRIP_TABLE)
-//                .withKeySerde(Serdes.String())
-//                .withValueSerde(TripSerde())
-//        )
 
         driversStream
             .foreach { key, _ ->

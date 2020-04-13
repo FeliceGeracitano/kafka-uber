@@ -36,7 +36,7 @@
       const direction = await getDirections(riderLocation, destination)
       directionsGeometry = direction.routes[0].geometry
       if (trip) driver = trip.driver
-      if (!trip) webSocket$.next(Actions.rider.requestTrip(riderLocation, destination))
+      if (!trip) webSocket$.next(Actions.rider.requestTrip({ from: riderLocation, to: destination }))
     },
     handleNewDriverLocation: async msg => {
       driver = JSON.parse(msg.payload)
