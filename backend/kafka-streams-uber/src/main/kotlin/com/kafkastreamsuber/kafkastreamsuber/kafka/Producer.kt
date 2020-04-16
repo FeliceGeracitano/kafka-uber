@@ -2,35 +2,45 @@ package com.kafkastreamsuber.kafkastreamsuber.kafka
 
 import com.kafkastreamsuber.kafkastreamsuber.models.Trip
 import com.kafkastreamsuber.kafkastreamsuber.models.User
+import org.apache.kafka.streams.kstream.KStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.EnableBinding
+import org.springframework.cloud.stream.annotation.Input
 import org.springframework.cloud.stream.annotation.Output
-import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.stereotype.Component
 
-
-@EnableBinding(ProducerInterface::class)
+@Component
+@EnableBinding(Producer.Bindings::class)
 class Producer {
     @Autowired
-    lateinit var ouput_user: MessageChannel
-
+    lateinit var output_1: MessageChannel
     @Autowired
-    lateinit var ouput_trip: MessageChannel
+    lateinit var output_2: MessageChannel
 
     fun produceUser(user: User) {
-        ouput_user.send(MessageBuilder.withPayload(user).setHeader(KafkaHeaders.MESSAGE_KEY, user.id).build())
+        output_1.send(MessageBuilder.withPayload(user).build())
     }
 
     fun produceTrip(trip: Trip) {
-        ouput_trip.send(MessageBuilder.withPayload(trip).setHeader(KafkaHeaders.MESSAGE_KEY, trip.id).build())
+        output_2.send(MessageBuilder.withPayload(trip).build())
     }
+
+
+
+    internal interface Bindings {
+        @Output(USER_TOPIC)
+        fun output_1(): MessageChannel
+
+        @Output(TRIP_TOPIC)
+        fun output_2(): MessageChannel
+
+        companion object {
+            const val USER_TOPIC = "output_1"
+            const val TRIP_TOPIC = "output_2"
+        }
+    }
+
 }
 
-interface ProducerInterface {
-    @Output("ouput_user")
-    fun ouput_user(): MessageChannel
-
-    @Output("ouput_trip")
-    fun ouput_trip(): MessageChannel
-}

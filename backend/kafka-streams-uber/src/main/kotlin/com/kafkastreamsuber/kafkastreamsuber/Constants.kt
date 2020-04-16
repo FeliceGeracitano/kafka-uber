@@ -8,12 +8,12 @@ const val TRIP_STORE = "trip_store"
 
 
 
-fun getRiderId(driverId: String): String {
-    return driverId.replaceFirst("D", "R")
+fun getRiderId(driverId: String?): String {
+    return driverId?.replaceFirst("D", "R") ?: ""
 }
 
-fun getDriverId(riderId: String): String {
-    return riderId.replaceFirst("R", "D")
+fun getDriverId(riderId: String?): String {
+    return riderId?.replaceFirst("R", "D")?: ""
 }
 
 val JsonParser = jacksonObjectMapper()

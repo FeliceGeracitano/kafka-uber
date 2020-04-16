@@ -77,7 +77,8 @@ class WSRider : TextWebSocketHandler() {
         if (action.payload == null) throw Error("Missing Location Payload")
         when (action?.type) {
             ACTION_TYPE.REQUEST_TRIP -> {
-                val (riderLocation, destination) = jsonParser.readValue(action.payload, RequestRidePayload::class.java)
+                val (riderLocation, destination
+                ) = jsonParser.readValue(action.payload, RequestRidePayload::class.java)
                 val uuid: UUID = UUID.randomUUID()
                 val tripUUID: String = uuid.toString()
                 val trip = Trip(tripUUID, TripStatus.REQUESTING, null, riderId, riderLocation, destination, null)
@@ -94,6 +95,6 @@ class WSRider : TextWebSocketHandler() {
     fun sendMessageToRider(riderId: String, msg: String) {
         val session = sessionList[riderId]
         if (session === null || !session.isOpen) return
-        session?.sendMessage(TextMessage(msg))
+        synchronized(session) { session.sendMessage(TextMessage(msg)) }
     }
 }

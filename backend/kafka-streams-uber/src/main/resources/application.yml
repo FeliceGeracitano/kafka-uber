@@ -1,14 +1,16 @@
-spring:
-  cloud:
-    stream:
-      bindings:
-        ouput_user:
-          destination: user_topic
-        ouput_trip:
-          destination: trip_topic
-        input_user:
-          destination: user_topic
-        input_trip:
-          destination: trip_topic
+spring.cloud.stream.kafka.streams.binder.configuration.commit.interval.ms: 0
+spring.cloud.stream.kafka.streams:
+  binder:
+    configuration:
+      heartbeat.interval.ms: 5000
+  bindings.input_1.consumer.application-id: read-users
+  bindings.input_2.consumer.application-id: read-trip
 
-
+spring.cloud.stream.bindings.input_1:
+  destination: user
+spring.cloud.stream.bindings.output_1:
+  destination: user
+spring.cloud.stream.bindings.input_2:
+  destination: trip
+spring.cloud.stream.bindings.output_2:
+  destination: trip

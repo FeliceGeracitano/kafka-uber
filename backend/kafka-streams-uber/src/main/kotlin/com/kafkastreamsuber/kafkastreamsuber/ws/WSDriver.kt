@@ -97,15 +97,24 @@ class WSDriver : TextWebSocketHandler() {
             ACTION_TYPE.CONFIRM_TRIP -> {
                 if (action.payload == null) throw Error("Missing Location Payload")
                 val (tripId, driverLocation) = jsonParser.readValue(action.payload, ConfirmRidePayload::class.java)
-                updateLocation(driverId, driverLocation)
+
+                // Update Driver
                 val driver = store.getUser(driverId)!!
                 driver.lastTripId = tripId
                 producer.produceUser(driver)
+
+                // Update Trip
+                val trip = store.getTrip(tripId)!!
+                trip.status = TripStatus.CONFIRMED
+                trip.driverId = driverId
+                producer.produceTrip(trip)
             }
             ACTION_TYPE.UPDATE_DRIVER_LOCATION -> {
                 if (action.payload == null) throw Error("Missing Location Payload")
                 val location = jsonParser.readValue(action.payload, Location::class.java)
-                updateLocation(driverId, location)
+                var driver = store.getUser(driverId) ?: return
+                driver.location = location
+                producer.produceUser(driver)
             }
             ACTION_TYPE.START_TRIP -> {
                 val trip = store.getLastTrip(driverId) ?: return
@@ -127,18 +136,9 @@ class WSDriver : TextWebSocketHandler() {
     private fun emit(session: WebSocketSession, msg: Action) =
             session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
 
-
-    fun updateLocation(driverId: String, location: Location) {
-        var driver = store.getUser(driverId) ?: return
-        driver.location = location
-        producer.produceUser(driver)
-    }
-
-
     fun sendMessage(driverId: String, msg: String) {
         val session = sessionList[driverId]
         if (session === null || !session.isOpen) return
-        session.sendMessage(TextMessage(msg))
-
+        synchronized(session) { session.sendMessage(TextMessage(msg)) }
     }
 }

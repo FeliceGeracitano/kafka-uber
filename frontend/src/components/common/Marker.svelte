@@ -1,28 +1,38 @@
 <script>
-  import { getContext, afterUpdate } from "svelte";
-  import { mapbox, mapContextKey } from "../../mapbox.js";
-  import { onMount } from "svelte";
+  import { getContext, afterUpdate } from 'svelte'
+  import { mapbox, mapContextKey } from '../../mapbox.js'
+  import { onMount } from 'svelte'
 
-  export let lat;
-  export let lon;
-  export let icon; // from | to | destination
-  let oldMarker;
-  const { getMap } = getContext(mapContextKey);
+  export let lat
+  export let lon
+  export let icon // from | to | destination
+  let marker
+  let markerDOM
 
-  let markerDOM;
+  const { getMap } = getContext(mapContextKey)
+
+  // onMount(() => {
+  //   marker = new mapbox.Marker()
+  // })
+
+  // afterUpdate(() => {
+  //   if (!lat || !lon) return
+  //   const map = getMap()
+  //   maker.setLngLat([lon, lat])
+  //   marker.addTo(map)
+  // })
 
   afterUpdate(() => {
-    if (!lat || !lon) return;
-    const map = getMap();
-    if (oldMarker) oldMarker.remove();
-    oldMarker = new mapbox.Marker(markerDOM).setLngLat([lon, lat]).addTo(map);
-  });
+    if (!lat || !lon) return
+    const map = getMap()
+    new mapbox.Marker(markerDOM).setLngLat([lon, lat]).addTo(map)
+  })
 </script>
 
 <style>
   .icon {
-    width: 18px;
-    height: 18px;
+    width: 22px;
+    height: 22px;
   }
 
   .to {
@@ -65,8 +75,7 @@
     border-radius: 50%;
     cursor: pointer;
     border: 3px solid white;
-    animation: current-location 1s ease-in-out 0s infinite alternate-reverse
-      none;
+    animation: current-location 1s ease-in-out 0s infinite alternate-reverse none;
   }
 
   @keyframes current-location {

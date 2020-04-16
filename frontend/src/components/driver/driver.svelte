@@ -56,6 +56,10 @@
     },
     [ACTION_TYPE.START_TRIP]: async msg => {
       trip = JSON.parse(msg.payload)
+    },
+    [ACTION_TYPE.CONFIRM_TRIP]: async msg => {
+      trip = JSON.parse(msg.payload)
+      animateDriver(0)
     }
   }
 
@@ -70,17 +74,17 @@
     webSocket$
       .multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.START_TRIP))
       .subscribe(msgHandlers[ACTION_TYPE.START_TRIP])
+    webSocket$
+      .multiplex(noop, noop, pathEq(['type'], ACTION_TYPE.CONFIRM_TRIP))
+      .subscribe(msgHandlers[ACTION_TYPE.CONFIRM_TRIP])
   })
 
   const sendLocationUpdate = throttle(() => {
-    console.log('sendLocationUpdate', driverLocation)
     webSocket$.next(Actions.driver.updateLocation(driverLocation))
   }, 1000)
 
   const handleClick = () => {
     webSocket$.next(Actions.driver.confirmTrip(trip.id, driverLocation))
-    trip = { ...trip, status: 'CONFIRMED' }
-    animateDriver(0)
   }
 
   const fetchDirections = async () => {
@@ -96,7 +100,7 @@
     timeLeftString = `${Math.floor(timeLeft / 60)}:${Math.floor(timeLeft % 60)}`
     const along = turf.along(route.geometry, progressMeter / 1000, { units: 'kilometers' })
     let [lon, lat] = along.geometry.coordinates
-    driverLocation = { lon, lat }
+    driverLocation = { lon: lon.toFixed(10), lat: lat.toFixed(10) }
     sendLocationUpdate()
     checkWhenCloseToRider()
     if (progressMeter < distance) requestAnimationFrame(animateDriver)
@@ -109,7 +113,7 @@
       turf.point([driverLocation.lon, driverLocation.lat]),
       turf.point([trip.from.lon, trip.from.lat])
     )
-    if (distanceFromRider <= 0.02) startTrip()
+    if (distanceFromRider <= 0.01) startTrip()
   }, 50)
   const endTrip = () => {
     webSocket$.send(Actions.driver.endTrip())
