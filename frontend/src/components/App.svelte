@@ -1,6 +1,6 @@
 <script>
-  import Rider from './components/rider/rider.svelte'
-  import Driver from './components/driver/driver.svelte'
+  import Rider from './Rider.svelte'
+  import Driver from './Driver.svelte'
   import { onMount } from 'svelte'
 </script>
 

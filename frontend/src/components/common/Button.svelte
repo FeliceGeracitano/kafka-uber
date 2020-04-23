@@ -1,14 +1,13 @@
 <script>
-  import { onMount } from "svelte";
-  export let label;
-  export let onClick;
+  import { onMount } from 'svelte'
+  export let label
+  export let onClick
 </script>
 
 <style>
   button {
     margin: 1rem;
-    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24),
-      0 17px 50px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
     background-color: #0875e1; /* Green */
     border: none;
     color: white;

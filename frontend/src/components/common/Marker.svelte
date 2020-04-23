@@ -1,6 +1,6 @@
 <script>
   import { getContext, afterUpdate } from 'svelte'
-  import { mapbox, mapContextKey } from '../../mapbox.js'
+  import { mapbox, mapContextKey } from '../../utils/mapbox'
   import { onMount } from 'svelte'
 
   export let lat

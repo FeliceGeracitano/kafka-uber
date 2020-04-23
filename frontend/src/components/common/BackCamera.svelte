@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext, afterUpdate, beforeUpdate } from 'svelte'
-  import { mapContextKey } from '../../mapbox.js'
+  import { mapContextKey } from '../../utils/mapbox'
   import { point } from '@turf/helpers'
   import TurfRhumbBearing from '@turf/rhumb-bearing'
 

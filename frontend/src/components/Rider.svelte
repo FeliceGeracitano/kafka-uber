@@ -1,17 +1,17 @@
 <script>
-  import Marker from '../common/Marker.svelte'
+  import Marker from './common/Marker.svelte'
   import mapBox from 'mapbox-gl'
-  import Map from '../common/Map.svelte'
-  import LineString from '../common/LineString.svelte'
-  import CountDown from '../common/CountDown.svelte'
-  import CenterView from '../common/CenterView.svelte'
-  import Actions, { ACTION_TYPE } from '../../actions'
+  import Map from './common/Map.svelte'
+  import LineString from './common/LineString.svelte'
+  import CountDown from './common/CountDown.svelte'
+  import CenterView from './common/CenterView.svelte'
+  import Actions, { ACTION_TYPE } from '../utils/actions'
   import { webSocket } from 'rxjs/webSocket'
-  import { RIDER_INIT_LOCATION, TRIP_DESTINATION } from '../../constants.js'
+  import { RIDER_INIT_LOCATION, TRIP_DESTINATION } from '../utils/constants'
   import { pipe, identity, filter, pathEq, or } from 'ramda'
   import { onMount } from 'svelte'
-  import { getUid } from '../../utils'
-  import { getDirections } from '../../mapbox.js'
+  import { getUid } from '../utils/utils'
+  import { getDirections } from '../utils/mapbox'
 
   let riderLocation = RIDER_INIT_LOCATION
   const destination = TRIP_DESTINATION
