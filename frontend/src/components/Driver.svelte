@@ -44,23 +44,23 @@
   $: cameraMode = ['STARTED', 'CONFIRMED'].includes(tripStatus) ? CAMERA.BACK : CAMERA.CENTER
 
   const msgHandlers = {
-    [ACTION_TYPE.SYNC_STATUS]: async msg => {
+    [ACTION_TYPE.SYNC_STATUS]: async (msg) => {
       trip = JSON.parse(msg.payload)
       if (trip.status !== 'CONFIRMED') return
       await fetchDirections()
-      animateDriver(0)
+      animateDriver()
     },
-    [ACTION_TYPE.REQUEST_TRIP]: async msg => {
+    [ACTION_TYPE.REQUEST_TRIP]: async (msg) => {
       trip = JSON.parse(msg.payload)
       if (!trip) return
       await fetchDirections()
     },
-    [ACTION_TYPE.START_TRIP]: async msg => {
+    [ACTION_TYPE.START_TRIP]: async (msg) => {
       trip = JSON.parse(msg.payload)
     },
-    [ACTION_TYPE.CONFIRM_TRIP]: async msg => {
+    [ACTION_TYPE.CONFIRM_TRIP]: async (msg) => {
       trip = JSON.parse(msg.payload)
-      animateDriver(0)
+      animateDriver()
     }
   }
 
@@ -93,19 +93,25 @@
     route = direction.routes[0]
   }
 
-  const animateDriver = async timestamp => {
-    if (!start) start = timestamp
-    var progressSeconds = (timestamp - start) / 1000
-    var progressMeter = progressSeconds * metersPerSecond
-    let timeLeft = tripDuration - timestamp / 1000
-    timeLeftString = formatSeconds(timeLeft)
-    const along = turf.along(route.geometry, progressMeter / 1000, { units: 'kilometers' })
-    let [lon, lat] = along.geometry.coordinates
-    driverLocation = { lon: lon.toFixed(10), lat: lat.toFixed(10) }
-    sendLocationUpdate()
-    checkWhenCloseToRider()
-    if (progressMeter < distance) requestAnimationFrame(animateDriver)
-    if (progressMeter >= distance) endTrip()
+  const animateDriver = () => {
+    const start = new Date().getTime()
+    function animate() {
+      let timestamp = new Date().getTime() - start
+      var progressSeconds = timestamp / 1000
+      var progressMeter = progressSeconds * metersPerSecond
+      let timeLeft = tripDuration - timestamp / 1000
+      timeLeftString = formatSeconds(timeLeft)
+      const along = turf.along(route.geometry, progressMeter / 1000, { units: 'kilometers' })
+      let [lon, lat] = along.geometry.coordinates
+      driverLocation = { lon: lon.toFixed(10), lat: lat.toFixed(10) }
+      sendLocationUpdate()
+      checkWhenCloseToRider()
+      if (progressMeter >= distance) {
+        clearInterval(interval)
+        endTrip()
+      }
+    }
+    var interval = setInterval(animate, 60)
   }
 
   const checkWhenCloseToRider = throttle(() => {
@@ -126,11 +132,6 @@
 </script>
 
 <style>
-  .container {
-    flex: 1 1 auto;
-    display: flex;
-    padding: 2rem;
-  }
   .box {
     flex: 1 1 auto;
     display: flex;
