@@ -1,0 +1,23 @@
+{
+  "sqltools.connections": [
+    {
+      "dialect": "Cassandra",
+      "name": "cassandra",
+      "password": " ",
+      "port": 9042,
+      "server": "localhost",
+      "username": " "
+    }
+  ],
+  "cassandraWorkbench.activeClusterName": "Cluster AllowAllAuthenticator",
+  "cassandraWorkbench.activeKeyspace": [
+    [
+      "Cluster AllowAllAuthenticator",
+      "kafka_streams_uber"
+    ],
+    [
+      "Cluster PasswordAuthenticator",
+      "kafka_streams_uber"
+    ]
+  ]
+}

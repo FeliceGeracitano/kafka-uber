@@ -1,0 +1,12 @@
+{
+  "sqltools.connections": [
+    {
+      "dialect": "Cassandra",
+      "name": "cass",
+      "password": " ",
+      "port": 9042,
+      "server": "localhost",
+      "username": " "
+    }
+  ]
+}

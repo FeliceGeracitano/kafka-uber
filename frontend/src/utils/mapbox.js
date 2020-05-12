@@ -10,6 +10,5 @@ export { mapbox, mapContextKey }
 export async function getDirections(...locations) {
   const coordinatesString = locations.map(({ lon, lat }) => `${lon},${lat}`).join(';')
   const endpoint = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinatesString}?geometries=geojson&access_token=${mapbox.accessToken}`
-  const resp = await (await fetch(endpoint)).json()
-  return resp.data
+  return await (await fetch(endpoint)).json()
 }

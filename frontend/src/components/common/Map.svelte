@@ -14,7 +14,7 @@
     const center = lon && lat ? [lon, lat] : undefined
     const localRef = new mapbox.Map({
       container,
-      style: 'mapbox://styles/mapbox/streets-v9',
+      style: 'mapbox://styles/felicegeracitano/ck51qxm9o02w41clj5swk76vi',
       center,
       zoom: zoom ? zoom : 15
     })

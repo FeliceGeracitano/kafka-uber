@@ -12,6 +12,7 @@
   import { onMount } from 'svelte'
   import { getUid } from '../utils/utils'
   import { getDirections } from '../utils/mapbox'
+  import Container from './common/Container.svelte'
 
   let riderLocation = RIDER_INIT_LOCATION
   const destination = TRIP_DESTINATION
@@ -61,11 +62,6 @@
 </script>
 
 <style>
-  .container {
-    flex: 1 1 auto;
-    display: flex;
-    padding: 2rem;
-  }
   .box {
     flex: 1 1 auto;
     display: flex;
@@ -87,7 +83,7 @@
   }
 </style>
 
-<div class="container">
+<Container title="Rider 👤">
   <div class="box">
     <div class="toolbar" />
     <div class="map">
@@ -98,8 +94,8 @@
           <Marker lat={driver.location.lat} lon={driver.location.lon} icon="driver" />
         {/if}
         <Marker lat={destination.lat} lon={destination.lon} icon="to" />
-        <LineString geometry={directionsGeometry} color="#19C681" />
+        <LineString geometry={directionsGeometry} color="#1e88e5" />
       </Map>
     </div>
   </div>
-</div>
+</Container>

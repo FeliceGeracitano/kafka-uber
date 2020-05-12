@@ -1,7 +1,11 @@
 package com.kafkastreamsuber.kafkastreamsuber.models
 
-data class Location(
-        val lat: Double,
-        val lon: Double
-)
 
+import org.springframework.data.cassandra.core.mapping.UserDefinedType
+
+
+@UserDefinedType("geo_point")
+data class Location(
+    val lat: Double,
+    val lon: Double
+)

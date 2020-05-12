@@ -1,0 +1,12 @@
+{
+  "sqltools.connections": [
+    {
+      "askForPassword": true,
+      "dialect": "Cassandra",
+      "name": "kuber",
+      "port": 9042,
+      "server": "localhost",
+      "username": "cassandra"
+    }
+  ]
+}

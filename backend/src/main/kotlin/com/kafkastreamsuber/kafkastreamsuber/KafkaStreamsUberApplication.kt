@@ -1,14 +1,12 @@
 package com.kafkastreamsuber.kafkastreamsuber
 
-import com.kafkastreamsuber.kafkastreamsuber.models.User
-import com.kafkastreamsuber.kafkastreamsuber.models.UserType
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.messaging.MessageChannel
-import javax.annotation.PostConstruct
+
 
 @SpringBootApplication
+@EnableAutoConfiguration
 class KafkaStreamsUberApplication
 
 fun main(args: Array<String>) {

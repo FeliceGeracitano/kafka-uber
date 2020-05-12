@@ -14,3 +14,7 @@ export const getUid = (key) => {
   // if (!localStorage.getItem("UID")) localStorage.setItem("UID", uuidv4());
   return `${key.charAt(0)}${uuid}`
 }
+
+// form '100' to '01: 40'
+export const formatSeconds = (seconds) =>
+  `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`

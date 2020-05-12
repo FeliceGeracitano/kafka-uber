@@ -2,6 +2,8 @@ package com.kafkastreamsuber.kafkastreamsuber.kafka
 
 import com.kafkastreamsuber.kafkastreamsuber.*
 import com.kafkastreamsuber.kafkastreamsuber.models.*
+import com.kafkastreamsuber.kafkastreamsuber.repositories.TripRepository
+import com.kafkastreamsuber.kafkastreamsuber.repositories.UserRepository
 import com.kafkastreamsuber.kafkastreamsuber.ws.WSDriver
 import com.kafkastreamsuber.kafkastreamsuber.ws.WSRider
 import org.apache.kafka.common.serialization.Serdes
@@ -20,7 +22,14 @@ import org.springframework.cloud.stream.annotation.StreamListener
 @EnableBinding(Consumer.Bindings::class)
 class Consumer {
     @Autowired
+    lateinit var userRepository: UserRepository
+
+    @Autowired
+    lateinit var tripRepository: TripRepository
+
+    @Autowired
     private lateinit var wsRider: WSRider
+
     @Autowired
     private lateinit var wsDriver: WSDriver
 
@@ -38,6 +47,16 @@ class Consumer {
                     JsonParser.writeValueAsString(buildUpdateLocationAction(driver))
                 )
             }
+
+        event
+            .foreach { _, user ->
+                try {
+                    userRepository.insert(UserEvent(user))
+                } catch (e: Exception) {
+                    println(e)
+                }
+            }
+
     }
 
     @StreamListener(Consumer.Bindings.TRIP_TOPIC)
@@ -54,6 +73,15 @@ class Consumer {
                 if (trip?.driverId is String || trip?.status == TripStatus.REQUESTING && trip?.riderId is String) {
                     val driverId = trip.driverId ?: getDriverId(trip?.riderId)
                     wsDriver.sendMessage(driverId, JsonParser.writeValueAsString(buildTripUpdateAction(trip)))
+                }
+            }
+
+        event
+            .foreach { _, trip ->
+                try {
+                    tripRepository.insert(TripEvent(trip))
+                } catch (e: Exception) {
+                    println(e)
                 }
             }
     }

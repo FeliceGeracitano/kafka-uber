@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { getContext, afterUpdate } from 'svelte'
   import { mapContextKey } from '../../utils/mapbox'
 

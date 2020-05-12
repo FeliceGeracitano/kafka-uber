@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import turf from '@turf/turf'
   import throttle from 'lodash-es/throttle'
   import once from 'lodash-es/once'
@@ -10,14 +10,15 @@
   import CountDown from './common/CountDown.svelte'
   import CenterView from './common/CenterView.svelte'
   import Button from './common/Button.svelte'
-  import BackCamera from './common/BackCamera.svelte'
+  import FarChaseCameraView from './common/FarChaseCameraView.svelte'
   import Actions, { ACTION_TYPE } from '../utils/actions'
   import { webSocket } from 'rxjs/webSocket'
   import { TAXI_INIT_LOCATION, noop, CAMERA } from '../utils/constants'
   import { pipe, identity, filter, pathEq, or } from 'ramda'
   import { onMount } from 'svelte'
-  import { getUid } from '../utils/utils'
+  import { getUid, formatSeconds } from '../utils/utils'
   import { getDirections } from '../utils/mapbox'
+  import Continer from './common/Container.svelte'
 
   let driverLocation = TAXI_INIT_LOCATION
   let webSocket$
@@ -97,7 +98,7 @@
     var progressSeconds = (timestamp - start) / 1000
     var progressMeter = progressSeconds * metersPerSecond
     let timeLeft = tripDuration - timestamp / 1000
-    timeLeftString = `${Math.floor(timeLeft / 60)}:${Math.floor(timeLeft % 60)}`
+    timeLeftString = formatSeconds(timeLeft)
     const along = turf.along(route.geometry, progressMeter / 1000, { units: 'kilometers' })
     let [lon, lat] = along.geometry.coordinates
     driverLocation = { lon: lon.toFixed(10), lat: lat.toFixed(10) }
@@ -151,7 +152,7 @@
   }
 </style>
 
-<div class="container">
+<Continer title="Driver 🏎️">
   <div class="box">
     <div class="toolbar">
       {#if trip && trip.status !== 'REQUESTING'}
@@ -169,7 +170,7 @@
         {/if}
 
         {#if cameraMode === CAMERA.BACK}
-          <BackCamera location={driverLocation} />
+          <FarChaseCameraView location={driverLocation} />
         {/if}
 
         <Marker lat={driverLocation.lat} lon={driverLocation.lon} icon="current-location" />
@@ -179,8 +180,8 @@
         {#if trip && trip.to}
           <Marker lat={trip.to.lat} lon={trip.to.lon} icon="to" />
         {/if}
-        <LineString geometry={route ? route.geometry : null} color="#44ACB9" />
+        <LineString geometry={route ? route.geometry : null} color="#1e88e5" />
       </Map>
     </div>
   </div>
-</div>
+</Continer>
