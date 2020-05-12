@@ -2,6 +2,9 @@ package com.kafkastreamsuber.kafkastreamsuber.ws
 
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.TripStatus
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.UserType
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Producer
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Store
 import com.kafkastreamsuber.kafkastreamsuber.models.*
@@ -62,7 +65,14 @@ class WSDriver : TextWebSocketHandler() {
         if (driverId == "") return session.close(CloseStatus(404))
         session.attributes["driverId"] = driverId
         sessionList[driverId] = session
-        producer.produceUser(User(driverId, null, UserType.DRIVER, null))
+        producer.produceUser(
+            User(
+                driverId,
+                null,
+                UserType.DRIVER,
+                null
+            )
+        )
 
         // send SYNC_STATUS message
         val lastTrip = store.getLastTrip(driverId)

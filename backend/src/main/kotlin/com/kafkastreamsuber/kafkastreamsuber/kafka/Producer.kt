@@ -1,11 +1,9 @@
 package com.kafkastreamsuber.kafkastreamsuber.kafka
 
-import com.kafkastreamsuber.kafkastreamsuber.models.Trip
-import com.kafkastreamsuber.kafkastreamsuber.models.User
-import org.apache.kafka.streams.kstream.KStream
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.Trip
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.EnableBinding
-import org.springframework.cloud.stream.annotation.Input
 import org.springframework.cloud.stream.annotation.Output
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder

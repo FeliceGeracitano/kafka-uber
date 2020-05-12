@@ -1,9 +1,10 @@
 package com.kafkastreamsuber.kafkastreamsuber.kafka
 
 import com.kafkastreamsuber.kafkastreamsuber.*
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.*
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.keyspace.trip.tripEvent.TripRepository
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.keyspace.user.userEvent.UserRepository
 import com.kafkastreamsuber.kafkastreamsuber.models.*
-import com.kafkastreamsuber.kafkastreamsuber.repositories.TripRepository
-import com.kafkastreamsuber.kafkastreamsuber.repositories.UserRepository
 import com.kafkastreamsuber.kafkastreamsuber.ws.WSDriver
 import com.kafkastreamsuber.kafkastreamsuber.ws.WSRider
 import org.apache.kafka.common.serialization.Serdes

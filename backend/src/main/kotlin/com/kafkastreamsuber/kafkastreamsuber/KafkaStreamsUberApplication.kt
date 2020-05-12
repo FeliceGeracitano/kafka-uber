@@ -6,7 +6,6 @@ import org.springframework.boot.runApplication
 
 
 @SpringBootApplication
-@EnableAutoConfiguration
 class KafkaStreamsUberApplication
 
 fun main(args: Array<String>) {

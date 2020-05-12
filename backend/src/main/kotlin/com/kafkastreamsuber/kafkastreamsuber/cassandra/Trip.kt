@@ -1,6 +1,8 @@
-package com.kafkastreamsuber.kafkastreamsuber.models
+package com.kafkastreamsuber.kafkastreamsuber.cassandra
 
 import com.datastax.driver.core.DataType
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
+import com.kafkastreamsuber.kafkastreamsuber.models.Location
 import org.springframework.data.cassandra.core.mapping.CassandraType
 import org.springframework.data.cassandra.core.mapping.Column
 import org.springframework.data.cassandra.core.mapping.PrimaryKey
@@ -15,17 +17,17 @@ enum class TripStatus {
 }
 
 data class Trip(
-        val id: String,
-        var status: TripStatus,
-        var driverId: String?,
-        val riderId: String?,
-        val from: Location,
-        val to: Location,
-        var driver: User? = null,
-        var prince: Double? = null
+    val id: String,
+    var status: TripStatus,
+    var driverId: String?,
+    val riderId: String?,
+    val from: Location,
+    val to: Location,
+    var driver: User? = null,
+    var prince: Double? = null
 )
 
-@Table
+@Table("trip_event")
 class TripEvent(trip: Trip) {
     @PrimaryKey("uid")
     var uid: String = Date().time.toString()
@@ -38,19 +40,19 @@ class TripEvent(trip: Trip) {
     @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.TEXT])
     var status: List<String> = listOf(trip.status.name)
 
-    @Column("driverId")
+    @Column("driver_id")
     @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.TEXT])
     var driverId: List<String> = listOf(trip.driverId?:"")
 
-    @Column("riderId")
+    @Column("rider_id")
     @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.TEXT])
     var riderId: List<String> = listOf(trip.riderId?:"")
 
-    @Column("fromLocation")
+    @Column("from_location")
     @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.UDT], userTypeName = "geo_point")
-    var fromLocation: List<Location?> = listOf(trip.from)
+    var fromLocation: List<Location?> = listOfNotNull(trip.from)
 
-    @Column("toLocation")
+    @Column("to_location")
     @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.UDT], userTypeName = "geo_point")
-    var toLocation: List<Location?> = listOf(trip.to)
+    var toLocation: List<Location?> = listOfNotNull(trip.to)
 }

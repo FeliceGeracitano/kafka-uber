@@ -1,6 +1,10 @@
 package com.kafkastreamsuber.kafkastreamsuber.ws
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.Trip
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.TripStatus
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
+import com.kafkastreamsuber.kafkastreamsuber.cassandra.UserType
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Producer
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Store
 import com.kafkastreamsuber.kafkastreamsuber.models.*
@@ -81,8 +85,21 @@ class WSRider : TextWebSocketHandler() {
                 ) = jsonParser.readValue(action.payload, RequestRidePayload::class.java)
                 val uuid: UUID = UUID.randomUUID()
                 val tripUUID: String = uuid.toString()
-                val trip = Trip(tripUUID, TripStatus.REQUESTING, null, riderId, riderLocation, destination, null)
-                val rider = User(riderId, riderLocation, UserType.RIDER, tripUUID)
+                val trip = Trip(
+                    tripUUID,
+                    TripStatus.REQUESTING,
+                    null,
+                    riderId,
+                    riderLocation,
+                    destination,
+                    null
+                )
+                val rider = User(
+                    riderId,
+                    riderLocation,
+                    UserType.RIDER,
+                    tripUUID
+                )
                 producer.produceTrip(trip)
                 producer.produceUser(rider)
             }

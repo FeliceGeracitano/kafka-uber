@@ -1,6 +1,7 @@
-package com.kafkastreamsuber.kafkastreamsuber.models
+package com.kafkastreamsuber.kafkastreamsuber.cassandra
 
 import com.datastax.driver.core.DataType
+import com.kafkastreamsuber.kafkastreamsuber.models.Location
 import org.springframework.data.cassandra.core.mapping.CassandraType
 import org.springframework.data.cassandra.core.mapping.Column
 import org.springframework.data.cassandra.core.mapping.PrimaryKey
@@ -20,7 +21,7 @@ data class User(
     var lastTripId: String? = null
 )
 
-@Table
+@Table("user_event")
 class UserEvent(user: User) {
     @PrimaryKey("uid")
     var uid: String = Date().time.toString()
@@ -42,6 +43,6 @@ class UserEvent(user: User) {
     var lastTripId: List<String> = listOf(user.lastTripId?:"")
 
     @Column("location")
-    @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.UDT], userTypeName = "geo_point")
-    var location: List<Location?> = listOf(user.location)
+    @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.UDT])
+    var location: List<Location?> = listOfNotNull(user.location)
 }
