@@ -3,131 +3,37 @@ package com.kafkastreamsuber.kafkastreamsuber.cassandra.keyspace.user
 import com.kafkastreamsuber.kafkastreamsuber.cassandra.CassandraConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.cassandra.config.CassandraClusterFactoryBean
 import org.springframework.data.cassandra.config.CassandraSessionFactoryBean
 import org.springframework.data.cassandra.core.CassandraAdminOperations
 import org.springframework.data.cassandra.core.CassandraAdminTemplate
+import org.springframework.data.cassandra.core.cql.keyspace.CreateKeyspaceSpecification
+import org.springframework.data.cassandra.core.cql.keyspace.DataCenterReplication
+import org.springframework.data.cassandra.core.cql.keyspace.KeyspaceOption
 import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.web.client.RestTemplate
+import javax.annotation.PostConstruct
 
-
-//@Configuration
-//@EnableCassandraRepositories
-//class CassandraConfig : AbstractCassandraConfiguration() {
-//
-//    private val keyspaceName = "kafka_uber_user_event";
-//    private val userKeySpaceName = "user_event"
-//    private val tripKeySpaceName = "trip_event"
-//    private val geoPoint = "GEO_POINT"
-//
-//    override fun getKeyspaceName(): String {
-//        return userKeySpaceName
-//    }
-//
-////    @Bean
-////    @Throws(Exception::class)
-////    override fun session(): CassandraSessionFactoryBean {
-////        val session = CassandraSessionFactoryBean()
-////        session.setCluster(cluster().getObject())
-////        session.setKeyspaceName(keyspaceName)
-////        converter<Any, Any>()?.let { session.setConverter(it) }
-////        session.schemaAction = SchemaAction.RECREATE
-////        return session
-////    }
-//
-////    @Bean
-////    @Throws(java.lang.Exception::class)
-////    override fun getSchemaAction(): SchemaAction {
-////        return SchemaAction.RECREATE
-////    }
-//
-////    @Bean
-////    @Throws(java.lang.Exception::class)
-////    fun <T, U> converter(): CassandraConverter? {
-////        return mappingContext()?.let { MappingCassandraConverter(it) }
-////    }
-//
-////    @Bean
-////    @Throws(java.lang.Exception::class)
-////    fun mappingContext(): CassandraMappingContext? {
-////        val mappingContext = BasicCassandraMappingContext()
-////        mappingContext.setUserTypeResolver(SimpleUserTypeResolver(cluster().getObject(), keyspaceName))
-////        return mappingContext
-////    }
-//
-//    override fun cluster(): CassandraClusterFactoryBean {
-//        val cluster = super.cluster()
-//        cluster.setJmxReportingEnabled(false)
-//        println("startupScripts: " + cluster.startupScripts)
-//        println("keyspaceActions: " + cluster.keyspaceActions)
-//        println("keyspaceSpecifications: " + cluster.keyspaceSpecifications)
-//        return cluster
-//    }
-//
-//    override fun getStartupScripts(): List<String> {
-//
-//        val keySpaces = arrayOf(userKeySpaceName, tripKeySpaceName)
-//
-//        val dropUserKeyspace = "DROP KEYSPACE IF EXISTS $userKeySpaceName;"
-//        val dropTripKeyspace = "DROP KEYSPACE IF EXISTS $tripKeySpaceName;"
-//
-//        val createUserKeyspace =
-//            "CREATE KEYSPACE IF NOT EXISTS $userKeySpaceName " +
-//                    "  WITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': 1} AND durable_writes = true;"
-//
-//        val createTripKeyspace =
-//            "CREATE KEYSPACE IF NOT EXISTS $tripKeySpaceName" +
-//                    "  WITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': 1} AND durable_writes = true;"
-//
-//        val createGeoPointUser = "CREATE TYPE IF NOT EXISTS ${userKeySpaceName}.${geoPoint} (lat DOUBLE, lon DOUBLE);"
-//        val createGeoPointTrip = "CREATE TYPE IF NOT EXISTS ${tripKeySpaceName}.${geoPoint} (lat DOUBLE, lon DOUBLE);"
-//
-//        val createUserEventTable = "CREATE TABLE $userKeySpaceName.$userKeySpaceName ( " +
-//                "  uid TEXT PRIMARY KEY," +
-//                "  timestamp LIST<TIMESTAMP>," +
-//                "  user_uid LIST<TEXT>," +
-//                "  location LIST<FROZEN<GEO_POINT>>," +
-//                "  user_type LIST<TEXT>," +
-//                "  last_trip_id LIST<TEXT>" +
-//                ");";
-//
-//        val createTripEventTable = "CREATE TABLE $tripKeySpaceName.$tripKeySpaceName( " +
-//                "  uid TEXT PRIMARY KEY," +
-//                "  timestamp LIST<TIMESTAMP>," +
-//                "  status LIST<TEXT>," +
-//                "  driverId LIST<TEXT>," +
-//                "  riderId LIST<TEXT>," +
-//                "  fromLocation LIST<FROZEN<GEO_POINT>>," +
-//                "  toLocation LIST<FROZEN<GEO_POINT>>" +
-//                ");";
-//
-//
-//        return mutableListOf(
-//            dropUserKeyspace,
-//            //dropTripKeyspace,
-//            createUserKeyspace,
-//            //createTripKeyspace,
-//            createGeoPointUser,
-//            //createGeoPointTrip,
-//            createUserEventTable
-//            //createTripEventTable
-//        )
-//    }
-//
-//    override fun getKeyspaceCreations(): MutableList<CreateKeyspaceSpecification> {
-//
-//
-//        return mutableListOf(CreateKeyspaceSpecification.createKeyspace("userKeySpaceName").withNetworkReplication())
-//    }
-//}
 
 @Configuration
+@ComponentScan
 @EnableCassandraRepositories(cassandraTemplateRef = "UserCassandraTemplate")
 class UserCassandraConfig : CassandraConfig() {
-    private val keyspace: String? = "user_event"
+    private val keyspace: String = "user_event"
     private val geoPointType: String = "geo_point"
 
     override fun getKeyspaceName(): String {
-        return keyspace!!
+        return keyspace
+    }
+
+    override fun getContactPoints(): String {
+        return "127.0.0.1"
     }
 
     @Bean("UserSession")
@@ -136,20 +42,34 @@ class UserCassandraConfig : CassandraConfig() {
     }
 
     @Bean("UserCassandraTemplate")
-    @Throws(Exception::class)
     fun cassandraTemplate(
         @Qualifier("UserSession") session: CassandraSessionFactoryBean
     ): CassandraAdminOperations {
         return CassandraAdminTemplate(session.getObject(), cassandraConverter())
     }
 
+    @Bean("userCluster")
+    override fun cluster(): CassandraClusterFactoryBean {
+        val cluster = super.cluster()
+        cluster.keyspaceCreations = keyspaceCreations;
+        cluster.setJmxReportingEnabled(false)
+        return cluster
+    }
+
+    @Bean("userGetKeyspaceCreations")
+    override fun getKeyspaceCreations(): List<CreateKeyspaceSpecification> {
+        return listOf(
+            CreateKeyspaceSpecification
+                .createKeyspace(keyspace).ifNotExists()
+                .with(KeyspaceOption.DURABLE_WRITES, true).withNetworkReplication(
+                    DataCenterReplication.of("DC1", 1)
+                )
+        )
+    }
+
     override fun getStartupScripts(): List<String> {
-        val dropKeyspace = "DROP KEYSPACE IF EXISTS $keyspace;"
-        val createKeyspace =
-            "CREATE KEYSPACE IF NOT EXISTS $keyspace" +
-                    "  WITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': 1} AND durable_writes = true;"
         val createGeoPoint = "CREATE TYPE IF NOT EXISTS ${keyspace}.${geoPointType} (lat DOUBLE, lon DOUBLE);"
-        val createTable = "CREATE TABLE $keyspace.$keyspace ( " +
+        val createTable = "CREATE TABLE IF NOT EXISTS $keyspace.$keyspace ( " +
                 "  uid TEXT PRIMARY KEY," +
                 "  timestamp LIST<TIMESTAMP>," +
                 "  user_uid LIST<TEXT>," +
@@ -157,12 +77,43 @@ class UserCassandraConfig : CassandraConfig() {
                 "  user_type LIST<TEXT>," +
                 "  last_trip_id LIST<TEXT>" +
                 ");";
+        return listOf(createGeoPoint, createTable)
+    }
 
-        return listOf(
-            dropKeyspace,
-            createKeyspace,
-            createGeoPoint,
-            createTable
-        )
+    @PostConstruct
+    private fun initUserIndexes() {
+        val elasticUrl = "http://localhost:9200/$keyspace"
+        val kibanaUrl = "http://localhost:9200/.kibana/doc/index-pattern:$keyspace"
+        val elasticIndex = "{\n" +
+                "  \"mappings\": {\n" +
+                "    \"trip_event\": {\n" +
+                "      \"discover\": \"^((?!location).)*\$\",\n" +
+                "      \"properties\": {\n" +
+                "        \"from_location\": {\n" +
+                "          \"type\": \"geo_point\"\n" +
+                "        },\n" +
+                "        \"to_location\": {\n" +
+                "          \"type\": \"geo_point\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  }\n" +
+                "}"
+        val kibanaIndex = "{\n" +
+                " \"type\" : \"index-pattern\",\n" +
+                " \"index-pattern\" : {\n" +
+                " \"title\": \"$keyspace*\",\n" +
+                " \"timeFieldName\": \"timestamp\"\n" +
+                " }\n" +
+                "}"
+        val restTemplate = RestTemplate()
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        try {
+            restTemplate.put(elasticUrl, HttpEntity<String>(elasticIndex, headers))
+            restTemplate.postForEntity(kibanaUrl, HttpEntity<String>(kibanaIndex, headers), String.javaClass)
+        } catch (e: Exception) {
+            println(e)
+        }
     }
 }

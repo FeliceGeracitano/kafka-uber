@@ -43,6 +43,6 @@ class UserEvent(user: User) {
     var lastTripId: List<String> = listOf(user.lastTripId?:"")
 
     @Column("location")
-    @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.UDT])
+    @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.UDT], userTypeName = "geo_point")
     var location: List<Location?> = listOfNotNull(user.location)
 }
