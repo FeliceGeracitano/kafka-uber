@@ -35,7 +35,7 @@ class Consumer {
     private lateinit var wsDriver: WSDriver
 
     @StreamListener(Consumer.Bindings.USER_TOPIC)
-    private fun materializeUsers(event: KStream<String, User>) {
+    private fun processUsers(event: KStream<String, User>) {
         event
             .map { _, value -> KeyValue(value.id, value) }
             .groupByKey(Grouped.with(Serdes.String(), UserSerde()))
@@ -61,7 +61,7 @@ class Consumer {
     }
 
     @StreamListener(Consumer.Bindings.TRIP_TOPIC)
-    private fun materializeTrips(event: KStream<String, Trip>) {
+    private fun processTrips(event: KStream<String, Trip>) {
         event
             .map { _, value -> KeyValue(value.id, value) }
             .groupByKey(Grouped.with(Serdes.String(), TripSerde()))

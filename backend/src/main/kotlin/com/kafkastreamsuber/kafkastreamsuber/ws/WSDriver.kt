@@ -26,10 +26,6 @@ import javax.annotation.PostConstruct
 @EnableWebSocket
 class WSDriverConfig : WebSocketConfigurer {
 
-    @PostConstruct
-    fun test() {
-        println("")
-    }
 
     @Autowired
     private val myWebSocketHandler: WSDriver? = null
