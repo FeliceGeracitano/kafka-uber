@@ -5,11 +5,13 @@ name: BE build CI
 
 on:
   push:
-    branches: [ master ]
-    paths: [ ./backend ]
+    branches: [master]
+    paths:
+      - "backend/**"
   pull_request:
-    branches: [ master ]
-    paths: [ ./backend ] 
+    branches: [master]
+    paths:
+      - "backend/**"
 
 defaults:
   run:
@@ -17,16 +19,15 @@ defaults:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build
