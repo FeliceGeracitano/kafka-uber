@@ -15,7 +15,7 @@ export const getUid = (key) => {
   return `${key.charAt(0)}${uuid}`
 }
 
-// form '100' to '01: 40'
+// Form '100' to '01: 40'
 export const formatSeconds = (seconds) =>
   `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 
