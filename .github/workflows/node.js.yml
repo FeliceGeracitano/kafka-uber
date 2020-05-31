@@ -6,8 +6,10 @@ name: FE Build CI
 on:
   push:
     branches: [ master ]
+    paths: [ ./frontend ]
   pull_request:
     branches: [ master ]
+    paths: [ ./frontend ]
 
 defaults:
   run:
