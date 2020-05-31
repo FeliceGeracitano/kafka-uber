@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/osx,code,kotlin,intellij
 # Edit at https://www.gitignore.io/?templates=osx,code,kotlin,intellij
 
@@ -155,8 +154,7 @@ Temporary Items
 .gradle
 /build/
 backend/build/
-
-!gradle/wrapper/gradle-wrapper.jar
+!backend/gradle/wrapper/gradle-wrapper.jar
 
 ### Eclipse ###
 .apt_generated
@@ -171,4 +169,3 @@ backend/build/
 *.iws
 *.iml
 *.ipr
-
