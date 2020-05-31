@@ -24,6 +24,9 @@ export default {
       payload: JSON.stringify(driverLocation)
     }),
     startTrip: () => ({ type: ACTION_TYPE.START_TRIP, payload: null }),
-    endTrip: () => ({ type: ACTION_TYPE.END_TRIP, payload: null })
+    endTrip: (tripId, amount, distance) => ({
+      type: ACTION_TYPE.END_TRIP,
+      payload: JSON.stringify({ tripId, amount, distance })
+    })
   }
 }

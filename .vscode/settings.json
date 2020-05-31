@@ -1,9 +1,9 @@
 {
   "sqltools.connections": [
     {
+      "askForPassword": true,
       "dialect": "Cassandra",
-      "name": "cass",
-      "password": " ",
+      "name": "Cassandra",
       "port": 9042,
       "server": "localhost",
       "username": " "

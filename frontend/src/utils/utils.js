@@ -18,3 +18,9 @@ export const getUid = (key) => {
 // form '100' to '01: 40'
 export const formatSeconds = (seconds) =>
   `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
+
+export const getTripAmount = () => {
+  const MIN = 10
+  const MAX = 50
+  return (Math.random() * (MAX - MIN) + MIN).toFixed(2)
+}

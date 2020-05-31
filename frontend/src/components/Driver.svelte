@@ -13,14 +13,14 @@
   import FarChaseCameraView from './common/FarChaseCameraView.svelte'
   import Actions, { ACTION_TYPE } from '../utils/actions'
   import { webSocket } from 'rxjs/webSocket'
-  import { TAXI_INIT_LOCATION, noop, CAMERA } from '../utils/constants'
+  import { RANDOM_TRIP, noop, CAMERA } from '../utils/constants'
   import { pipe, identity, filter, pathEq, or } from 'ramda'
   import { onMount } from 'svelte'
-  import { getUid, formatSeconds } from '../utils/utils'
+  import { getUid, formatSeconds, getTripAmount } from '../utils/utils'
   import { getDirections } from '../utils/mapbox'
   import Continer from './common/Container.svelte'
 
-  let driverLocation = TAXI_INIT_LOCATION
+  let driverLocation = RANDOM_TRIP.driver
   let webSocket$
   let trip = null
   let route = null
@@ -111,7 +111,7 @@
         endTrip()
       }
     }
-    var interval = setInterval(animate, 60)
+    var interval = setInterval(animate, 50)
   }
 
   const checkWhenCloseToRider = throttle(() => {
@@ -123,7 +123,7 @@
     if (distanceFromRider <= 0.01) startTrip()
   }, 50)
   const endTrip = () => {
-    webSocket$.send(Actions.driver.endTrip())
+    webSocket$.next(Actions.driver.endTrip(trip.id, getTripAmount(), distance))
     localStorage.clear()
   }
   const startTrip = once(() => {

@@ -1,6 +1,5 @@
 package com.kafkastreamsuber.kafkastreamsuber.ws
 
-
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.kafkastreamsuber.kafkastreamsuber.cassandra.TripStatus
 import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
@@ -19,13 +18,11 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
-import javax.annotation.PostConstruct
 
 
 @Configuration
 @EnableWebSocket
 class WSDriverConfig : WebSocketConfigurer {
-
 
     @Autowired
     private val myWebSocketHandler: WSDriver? = null
@@ -74,22 +71,22 @@ class WSDriver : TextWebSocketHandler() {
         val lastTrip = store.getLastTrip(driverId)
         if (lastTrip !== null) {
             session.sendMessage(
-                    TextMessage(
-                            jacksonObjectMapper().writeValueAsString(
-                                    Action(ACTION_TYPE.SYNC_STATUS, jacksonObjectMapper().writeValueAsString(lastTrip))
-                            )
+                TextMessage(
+                    jacksonObjectMapper().writeValueAsString(
+                        Action(ACTION_TYPE.SYNC_STATUS, jacksonObjectMapper().writeValueAsString(lastTrip))
                     )
+                )
             )
         }
 
         // send REQUEST_TRIP message
         val requestingTrip = store.getPendingRequests(driverId) ?: return
         session.sendMessage(
-                TextMessage(
-                        jacksonObjectMapper().writeValueAsString(
-                                Action(ACTION_TYPE.REQUEST_TRIP, jacksonObjectMapper().writeValueAsString(requestingTrip))
-                        )
+            TextMessage(
+                jacksonObjectMapper().writeValueAsString(
+                    Action(ACTION_TYPE.REQUEST_TRIP, jacksonObjectMapper().writeValueAsString(requestingTrip))
                 )
+            )
         )
     }
 
@@ -135,18 +132,23 @@ class WSDriver : TextWebSocketHandler() {
             }
             ACTION_TYPE.END_TRIP -> {
                 val driver = store.getUser(driverId) ?: return
+                val endTripPayload = jsonParser.readValue(action.payload, EndTripPayload::class.java)
                 val trip = store.getTrip(driver.lastTripId ?: "") ?: return
-                trip.status = TripStatus.ENDED
-                producer.produceTrip(trip)
-                driver.lastTripId = null
-                producer.produceUser(driver)
+                producer.produceTrip(trip.apply {
+                    status = TripStatus.ENDED
+                    amount = endTripPayload.amount
+                    distance = endTripPayload.distance
+                })
+                producer.produceUser(driver.apply {
+                    lastTripId = null
+                })
             }
         }
 
     }
 
     private fun emit(session: WebSocketSession, msg: Action) =
-            session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
+        session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
 
     fun sendMessage(driverId: String, msg: String) {
         val session = sessionList[driverId]

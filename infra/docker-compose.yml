@@ -54,6 +54,7 @@ services:
       PORT: 9021
 
   elassandra:
+    container_name: elassandra
     image: "docker.io/strapdata/elassandra:6.8.4.3"
     environment:
       - "JVM_OPTS=-Dcassandra.custom_query_handler_class=org.elassandra.index.ElasticQueryHandler"
@@ -71,48 +72,17 @@ services:
       - "9200:9200"
 
   kibana:
+    container_name: kibana
     image: docker.elastic.co/kibana/kibana-oss:6.8.4
     environment:
       - "ELASTICSEARCH_URL=http://elassandra:9200"
     ports:
       - "5601:5601"
     mem_limit: 500m
-  # elassandra_seed:
-  #   image: "docker.io/strapdata/elassandra:6.8.4.3"
-  #   environment:
-  #     - "JVM_OPTS=-Dcassandra.custom_query_handler_class=org.elassandra.index.ElasticQueryHandler"
-  #     - "MAX_HEAP_SIZE=1200m"
-  #     - "HEAP_NEWSIZE=300m"
-  #     - "CASSANDRA_CGROUP_MEMORY_LIMIT=true"
-  #     - "DEBUG=true"
-  #   cap_add:
-  #     - IPC_LOCK
-  #   ulimits:
-  #     memlock: -1
-  #   mem_limit: 2000m
-  #   ports:
-  #     - "9042:9042"
-  #     - "9200:9200"
-  # elassandra:
-  #   image: "docker.io/strapdata/elassandra:6.8.4.3"
-  #   environment:
-  #     - "JVM_OPTS=-Dcassandra.custom_query_handler_class=org.elassandra.index.ElasticQueryHandler"
-  #     - "MAX_HEAP_SIZE=1200m"
-  #     - "HEAP_NEWSIZE=300m"
-  #     - "CASSANDRA_CGROUP_MEMORY_LIMIT=true"
-  #     - "CASSANDRA_SEEDS=elassandra_seed"
-  #     - "DEBUG=true"
-  #   links:
-  #     - elassandra_seed
-  #   cap_add:
-  #     - IPC_LOCK
-  #   ulimits:
-  #     memlock: -1
-  #   mem_limit: 2000m
-  # kibana:
-  #   image: docker.elastic.co/kibana/kibana-oss:6.8.4
-  #   environment:
-  #     - "ELASTICSEARCH_URL=http://elassandra_seed:9200"
-  #   ports:
-  #     - "5601:5601"
-  #   mem_limit: 500m
+
+  schema-init:
+    container_name: schema-init
+    build: ./schema-init
+    environment:
+      ELASTIC_URL: "http://elassandra:9200"
+      CASSANDRA_HOST: "elassandra"

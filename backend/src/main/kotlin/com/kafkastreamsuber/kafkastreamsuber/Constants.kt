@@ -7,7 +7,6 @@ const val USER_STORE = "user_store"
 const val TRIP_STORE = "trip_store"
 
 
-
 fun getRiderId(driverId: String?): String {
     return driverId?.replaceFirst("D", "R") ?: ""
 }

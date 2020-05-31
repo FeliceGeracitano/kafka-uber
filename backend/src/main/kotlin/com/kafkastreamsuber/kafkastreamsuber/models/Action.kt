@@ -22,6 +22,8 @@ data class Action(val type: ACTION_TYPE, val payload: String?)
 
 data class RequestRidePayload(val riderLocation: Location, val destination: Location)
 data class ConfirmRidePayload(val tripId: String, val driverLocation: Location)
+data class EndTripPayload(val tripId: String, val amount: Double, val distance: Double)
+
 
 
 val buildUpdateLocationAction = {

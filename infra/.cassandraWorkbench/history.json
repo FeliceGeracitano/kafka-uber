@@ -1,1 +1,0 @@
-[{"id":"uNBZS1cgt0hWM4KX","clusterName":"Cluster AllowAllAuthenticator","keyspace":null,"timestamp":"2020-05-09T21:49:48.162Z","body":"CREATE KEYSPACE kafka_streams_uber\n WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': 1 } AND DURABLE_WRITES = true;"}]

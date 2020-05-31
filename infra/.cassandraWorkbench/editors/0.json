@@ -1,1 +1,0 @@
-{"body":"CREATE KEYSPACE IF NOT EXISTS kafka_uber\nWITH replication = {'class': 'NetworkTopologyStrategy', 'DC1': '1'}\nAND durable_writes = true;","clusterName":"Cluster AllowAllAuthenticator","filename":"script_1.cql","id":"E1esmbqzGpjSaCKn","keyspace":"kafka_streams_uber","modified":true,"source":"action"}

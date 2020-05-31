@@ -1,7 +1,6 @@
 package com.kafkastreamsuber.kafkastreamsuber.cassandra
 
 import com.datastax.driver.core.DataType
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
 import com.kafkastreamsuber.kafkastreamsuber.models.Location
 import org.springframework.data.cassandra.core.mapping.CassandraType
 import org.springframework.data.cassandra.core.mapping.Column
@@ -24,7 +23,8 @@ data class Trip(
     val from: Location,
     val to: Location,
     var driver: User? = null,
-    var prince: Double? = null
+    var amount: Double? = null,
+    var distance: Double? = null
 )
 
 @Table("trip_event")
@@ -55,4 +55,12 @@ class TripEvent(trip: Trip) {
     @Column("to_location")
     @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.UDT], userTypeName = "geo_point")
     var toLocation: List<Location?> = listOfNotNull(trip.to)
+
+    @Column("amount")
+    @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.DOUBLE])
+    var amount: List<Double?> = listOfNotNull(trip.amount)
+
+    @Column("distance")
+    @CassandraType(type = DataType.Name.LIST, typeArguments = [DataType.Name.DOUBLE])
+    var distance: List<Double?> = listOfNotNull(trip.distance)
 }

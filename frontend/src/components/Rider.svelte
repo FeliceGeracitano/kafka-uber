@@ -7,15 +7,15 @@
   import CenterView from './common/CenterView.svelte'
   import Actions, { ACTION_TYPE } from '../utils/actions'
   import { webSocket } from 'rxjs/webSocket'
-  import { RIDER_INIT_LOCATION, TRIP_DESTINATION } from '../utils/constants'
+  import { RANDOM_TRIP } from '../utils/constants'
   import { pipe, identity, filter, pathEq, or } from 'ramda'
   import { onMount } from 'svelte'
   import { getUid } from '../utils/utils'
   import { getDirections } from '../utils/mapbox'
   import Container from './common/Container.svelte'
 
-  let riderLocation = RIDER_INIT_LOCATION
-  const destination = TRIP_DESTINATION
+  let riderLocation = RANDOM_TRIP.rider
+  const destination = RANDOM_TRIP.destination
   let directionsGeometry = null
   let webSocket$
   let trip
@@ -32,20 +32,20 @@
   }
 
   const msgHandlers = {
-    handleSyncStatus: async msg => {
+    handleSyncStatus: async (msg) => {
       trip = JSON.parse(msg.payload)
       const direction = await getDirections(riderLocation, destination)
       directionsGeometry = direction.routes[0].geometry
       if (trip) driver = trip.driver
       if (!trip) webSocket$.next(Actions.rider.requestTrip({ from: riderLocation, to: destination }))
     },
-    handleNewDriverLocation: async msg => {
+    handleNewDriverLocation: async (msg) => {
       driver = JSON.parse(msg.payload)
       if (trip && trip.status === 'STARTED') {
         riderLocation = driver.location
       }
     },
-    handleUpdateTrip: async msg => {
+    handleUpdateTrip: async (msg) => {
       trip = JSON.parse(msg.payload)
     }
   }
