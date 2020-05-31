@@ -9,13 +9,13 @@ export const CAMERA = {
 }
 
 export const TRIPS = [
-  // ROME
+  // ROMA
   {
     driver: { lat: 41.890389, lon: 12.494072 },
     rider: { lat: 41.888538, lon: 12.490261 },
     destination: { lat: 41.90101, lon: 12.482896 }
   },
-  // MILAN
+  // MILANO
   {
     driver: { lat: 45.45296, lon: 9.178091 },
     rider: { lat: 45.456044, lon: 9.18735 },
