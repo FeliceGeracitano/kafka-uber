@@ -1,3 +1,0 @@
-[submodule "infra/cp-helm-charts"]
-	path = infra/cp-helm-charts
-	url = https://github.com/confluentinc/cp-helm-charts.git
