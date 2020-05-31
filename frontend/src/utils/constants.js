@@ -15,7 +15,7 @@ export const TRIPS = [
     rider: { lat: 41.888538, lon: 12.490261 },
     destination: { lat: 41.90101, lon: 12.482896 }
   },
-  // MILANO
+  // MILAN
   {
     driver: { lat: 45.45296, lon: 9.178091 },
     rider: { lat: 45.456044, lon: 9.18735 },
