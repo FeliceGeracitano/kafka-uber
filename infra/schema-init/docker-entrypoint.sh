@@ -46,22 +46,24 @@ curl -XPUT "$ELASTIC_URL/trip_event" -H 'Content-Type: application/json' -d'
   }
 }'
 
+# NB: this does not work if indexes are empty
+
 # Kibana Index Mapping
-curl -XPOST "$ELASTIC_URL/.kibana/doc/index-pattern:trip_event" -H 'Content-Type: application/json' -d'
-{
-"type" : "index-pattern",
- "index-pattern" : {
- "title": "trip_event*",
- "timeFieldName": "timestamp"
- }
-}'
-curl -XPOST "$ELASTIC_URL/.kibana/doc/index-pattern:trip_event" -H 'Content-Type: application/json' -d'
-{
-"type" : "index-pattern",
- "index-pattern" : {
- "title": "trip_event*",
- "timeFieldName": "timestamp"
- }
-}'
+# curl -XPOST "$ELASTIC_URL/.kibana/doc/index-pattern:trip_event" -H 'Content-Type: application/json' -d'
+# {
+# "type" : "index-pattern",
+#  "index-pattern" : {
+#  "title": "trip_event*",
+#  "timeFieldName": "timestamp"
+#  }
+# }'
+# curl -XPOST "$ELASTIC_URL/.kibana/doc/index-pattern:trip_event" -H 'Content-Type: application/json' -d'
+# {
+# "type" : "index-pattern",
+#  "index-pattern" : {
+#  "title": "trip_event*",
+#  "timeFieldName": "timestamp"
+#  }
+# }'
 
 echo "Done."
