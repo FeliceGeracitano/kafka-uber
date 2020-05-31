@@ -9,23 +9,47 @@ export const CAMERA = {
 }
 
 export const TRIPS = [
-  // // ROME
-  // {
-  //   rider: { lat: 41.888538, lon: 12.490261 },
-  //   driver: { lat: 41.890389, lon: 12.494072 },
-  //   destination: { lat: 41.90101, lon: 12.482896 }
-  // },
-  // // MILAN
-  // {
-  //   rider: { lat: 45.456044, lon: 9.18735 },
-  //   driver: { lat: 45.45296, lon: 9.178091 },
-  //   destination: { lat: 45.465155, lon: 9.188582 }
-  // },
+  // ROME
+  {
+    driver: { lat: 41.890389, lon: 12.494072 },
+    rider: { lat: 41.888538, lon: 12.490261 },
+    destination: { lat: 41.90101, lon: 12.482896 }
+  },
+  // MILAN
+  {
+    driver: { lat: 45.45296, lon: 9.178091 },
+    rider: { lat: 45.456044, lon: 9.18735 },
+    destination: { lat: 45.465155, lon: 9.188582 }
+  },
   // LONDON
   {
-    rider: { lat: 51.505908, lon: -0.130722 },
-    driver: { lat: 51.50649, lon: -0.129339 },
-    destination: { lat: 51.505092, lon: -0.132762 }
+    driver: { lat: 51.501078, lon: -0.126236 },
+    rider: { lat: 51.50714, lon: -0.12793 },
+    destination: { lat: 51.50222, lon: -0.141114 }
+  },
+  // NY
+  {
+    driver: { lat: 40.7505637, lon: -73.9932548 },
+    rider: { lat: 40.752413, lon: -73.985836 },
+    destination: { lat: 40.7562563, lon: -73.9834948 }
+  },
+  // TOKYO
+  {
+    driver: { lat: 35.6637248, lon: 139.7813928 },
+    rider: { lat: 35.664697, lon: 139.775353 },
+    destination: { lat: 35.661751, lon: 139.7747294 }
+  },
+  // SF
+  {
+    driver: { lat: 37.754795, lon: -122.441818 },
+    rider: { lat: 37.76198, lon: -122.437095 },
+    destination: { lat: 37.768388, lon: -122.427653 }
+  },
+  // SYDNEY
+  {
+    driver: { lat: -33.864257, lon: 151.205528 },
+    rider: { lat: -33.866696, lon: 151.209974 },
+    destination: { lat: -33.871041, lon: 151.210174 }
   }
 ]
 
