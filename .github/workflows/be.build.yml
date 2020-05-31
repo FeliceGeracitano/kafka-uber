@@ -6,8 +6,10 @@ name: BE build CI
 on:
   push:
     branches: [ master ]
+    paths: [ ./backend ]
   pull_request:
     branches: [ master ]
+    paths: [ ./backend ] 
 
 defaults:
   run:
