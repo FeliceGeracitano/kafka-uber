@@ -1,4 +1,5 @@
 ![FE Build CI](https://github.com/FeliceGeracitano/kafka-uber/workflows/FE%20Build%20CI/badge.svg?branch=master)
+![BE build CI](https://github.com/FeliceGeracitano/kafka-uber/workflows/BE%20build%20CI/badge.svg?branch=master)
 
 # kafka-uber
 
