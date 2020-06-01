@@ -1,7 +1,6 @@
-package com.kafkastreamsuber.kafkastreamsuber.cassandra
+package com.kafkastreamsuber.kafkastreamsuber.models
 
 import com.datastax.driver.core.DataType
-import com.kafkastreamsuber.kafkastreamsuber.models.Location
 import org.springframework.data.cassandra.core.mapping.CassandraType
 import org.springframework.data.cassandra.core.mapping.Column
 import org.springframework.data.cassandra.core.mapping.PrimaryKey

@@ -1,9 +1,9 @@
 package com.kafkastreamsuber.kafkastreamsuber.ws
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.TripStatus
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.UserType
+import com.kafkastreamsuber.kafkastreamsuber.models.TripStatus
+import com.kafkastreamsuber.kafkastreamsuber.models.User
+import com.kafkastreamsuber.kafkastreamsuber.models.UserType
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Producer
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Store
 import com.kafkastreamsuber.kafkastreamsuber.models.*

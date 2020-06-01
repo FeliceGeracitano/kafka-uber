@@ -1,7 +1,7 @@
-package com.kafkastreamsuber.kafkastreamsuber.cassandra.keyspace.trip.tripEvent
+package com.kafkastreamsuber.kafkastreamsuber.cassandra.keyspace.trip
 
 
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.TripEvent
+import com.kafkastreamsuber.kafkastreamsuber.models.TripEvent
 import org.springframework.data.cassandra.repository.CassandraRepository
 import org.springframework.stereotype.Repository
 

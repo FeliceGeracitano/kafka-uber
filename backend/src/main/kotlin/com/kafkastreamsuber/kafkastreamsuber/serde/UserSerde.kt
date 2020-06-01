@@ -2,7 +2,7 @@ package org.jetbrains.kotlin.demo.serde
 
 
 import com.kafkastreamsuber.kafkastreamsuber.JsonParser
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
+import com.kafkastreamsuber.kafkastreamsuber.models.User
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serializer

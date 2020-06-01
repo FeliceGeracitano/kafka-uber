@@ -3,8 +3,8 @@ package com.kafkastreamsuber.kafkastreamsuber.kafka
 import com.kafkastreamsuber.kafkastreamsuber.TRIP_STORE
 import com.kafkastreamsuber.kafkastreamsuber.USER_STORE
 import com.kafkastreamsuber.kafkastreamsuber.getRiderId
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.Trip
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
+import com.kafkastreamsuber.kafkastreamsuber.models.Trip
+import com.kafkastreamsuber.kafkastreamsuber.models.User
 import org.apache.kafka.streams.state.QueryableStoreTypes.keyValueStore
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore
 import org.slf4j.LoggerFactory

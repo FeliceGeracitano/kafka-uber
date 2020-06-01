@@ -1,7 +1,7 @@
 package com.kafkastreamsuber.kafkastreamsuber.kafka
 
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.Trip
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
+import com.kafkastreamsuber.kafkastreamsuber.models.Trip
+import com.kafkastreamsuber.kafkastreamsuber.models.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.EnableBinding
 import org.springframework.cloud.stream.annotation.Output

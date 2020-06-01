@@ -1,7 +1,7 @@
-package com.kafkastreamsuber.kafkastreamsuber.cassandra.keyspace.user.userEvent
+package com.kafkastreamsuber.kafkastreamsuber.cassandra.keyspace.user
 
 
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.UserEvent
+import com.kafkastreamsuber.kafkastreamsuber.models.UserEvent
 import org.springframework.data.cassandra.repository.CassandraRepository
 import org.springframework.stereotype.Repository
 

@@ -21,7 +21,6 @@ class UserCassandraConfig : CassandraConfig() {
     override fun session(): CassandraSessionFactoryBean {
         val session = super.session()
         session.setKeyspaceName(keyspaceName)
-        session.setStartupScripts(startupScripts)
         return session
     }
 

@@ -1,20 +1,14 @@
 package com.kafkastreamsuber.kafkastreamsuber.models
 
 import com.kafkastreamsuber.kafkastreamsuber.JsonParser
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.Trip
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.TripStatus
-import com.kafkastreamsuber.kafkastreamsuber.cassandra.User
 
 
 enum class ACTION_TYPE {
     REQUEST_TRIP,
-
-    // Driver
     CONFIRM_TRIP,
     UPDATE_DRIVER_LOCATION,
     START_TRIP,
     END_TRIP,
-
     SYNC_STATUS
 }
 
