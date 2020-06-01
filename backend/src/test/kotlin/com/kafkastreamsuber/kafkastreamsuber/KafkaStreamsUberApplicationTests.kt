@@ -8,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest
 @SpringBootTest
 class KafkaStreamsUberApplicationTests {
 
-	@Test
 	fun contextLoads() {
 	}
-
 }
