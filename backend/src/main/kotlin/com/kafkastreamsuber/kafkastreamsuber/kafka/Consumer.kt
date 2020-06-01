@@ -67,10 +67,10 @@ class Consumer {
             .reduce({ _, new -> new }, Materialized.`as`(TRIP_STORE))
             .toStream()
             .foreach { _, trip ->
-                if (trip?.riderId is String) {
+                if (trip.riderId is String) {
                     wsRider.sendMessageToRider(trip.riderId, JsonParser.writeValueAsString(buildTripUpdateAction(trip)))
                 }
-                if (trip?.driverId is String || trip?.status == TripStatus.REQUESTING && trip?.riderId is String) {
+                if (trip.driverId is String || trip.status == TripStatus.REQUESTING && trip.riderId is String) {
                     val driverId = trip.driverId ?: getDriverId(trip?.riderId)
                     wsDriver.sendMessage(driverId, JsonParser.writeValueAsString(buildTripUpdateAction(trip)))
                 }

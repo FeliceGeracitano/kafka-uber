@@ -23,7 +23,7 @@ class Store {
 
     fun getUser(id: String): User? {
         return try {
-            if (userStore == null) userStore = queryService?.getQueryableStore(USER_STORE, keyValueStore());
+            if (userStore == null) userStore = queryService.getQueryableStore(USER_STORE, keyValueStore());
             userStore?.get(id)
         } catch (e: Exception) {
             LOGGER.error("User store error: $e")
@@ -34,7 +34,7 @@ class Store {
 
     fun getTrip(id: String?): Trip? {
         return try {
-            if (tripStore == null) tripStore = queryService?.getQueryableStore(TRIP_STORE, keyValueStore());
+            if (tripStore == null) tripStore = queryService.getQueryableStore(TRIP_STORE, keyValueStore());
             tripStore?.get(id)
         } catch (e: Exception) {
             LOGGER.error("Trip store error: $e")
@@ -49,6 +49,6 @@ class Store {
 
     fun getPendingRequests(driverId: String): Trip? {
         val user = getUser(getRiderId(driverId))?: return null
-        return getTrip(user?.lastTripId)
+        return getTrip(user.lastTripId)
     }
 }

@@ -70,8 +70,8 @@ class WSRider : TextWebSocketHandler() {
 
     @Throws(Exception::class)
     override fun handleTextMessage(session: WebSocketSession, textMessage: TextMessage) {
-        val jsonString = textMessage?.payload.toString()
-        val riderId = session?.attributes?.get("riderId") as String
+        val jsonString = textMessage.payload.toString()
+        val riderId = session.attributes["riderId"] as String
         val action = try {
             jsonParser.readValue(jsonString, Action::class.java)
         } catch (_: java.lang.Exception) {
@@ -103,6 +103,7 @@ class WSRider : TextWebSocketHandler() {
                 producer.produceTrip(trip)
                 producer.produceUser(rider)
             }
+            else -> {}
         }
     }
 

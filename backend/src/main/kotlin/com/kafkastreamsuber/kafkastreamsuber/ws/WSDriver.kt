@@ -93,8 +93,8 @@ class WSDriver : TextWebSocketHandler() {
 
     @Throws(Exception::class)
     public override fun handleTextMessage(session: WebSocketSession, textMessage: TextMessage) {
-        val jsonString = textMessage?.payload.toString()
-        val driverId = session?.attributes?.get("driverId") as String
+        val jsonString = textMessage.payload.toString()
+        val driverId = session.attributes.get("driverId") as String
         val action: Action = try {
             jsonParser.readValue(jsonString, Action::class.java)
         } catch (_: java.lang.Exception) {
@@ -105,7 +105,7 @@ class WSDriver : TextWebSocketHandler() {
         when (action.type) {
             ACTION_TYPE.CONFIRM_TRIP -> {
                 if (action.payload == null) throw Error("Missing Location Payload")
-                val (tripId, driverLocation) = jsonParser.readValue(action.payload, ConfirmRidePayload::class.java)
+                val (tripId) = jsonParser.readValue(action.payload, ConfirmRidePayload::class.java)
 
                 // Update Driver
                 val driver = store.getUser(driverId)!!
@@ -143,6 +143,7 @@ class WSDriver : TextWebSocketHandler() {
                     lastTripId = null
                 })
             }
+            else -> {}
         }
 
     }
