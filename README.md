@@ -2,82 +2,46 @@
 ![BE build CI](https://github.com/FeliceGeracitano/kafka-uber/workflows/BE%20build%20CI/badge.svg?branch=master)
 
 # kafka-uber
+Streaming application POC - https://medium.com/@felice.geracitano/zero-to-demo-streaming-application-part-1-frontend-ec6cb95ee7d2
 
-Kafka Uber Demo App
 
-### installation
-
-```
-git clone --recurse-submodules https://github.com/FeliceGeracitano/kafka-uber.git
-```
-
-### frontend
-
-- svelte
-- mapbox
-
-### backend
-
-- kotlin
-
-### infra
-
-```
-$ cd git/examples/cp-all-in-one
-$ docker-compose up
-```
-
-> dashboard running at: http://localhost:9021/
-
-#### deprecated
-
-- kubernetes?
-- kafka
-- dependecies:
-  - helm
-
+### Run dependecies
 ```bash
-brew install helm
+$ cd infra
+$ docker-compose up --build
 ```
+> Confluent monitor dashboard available at: http://localhost:9021/clusters  
+> Kibana available at http://localhost:5601/
 
-- deploy cluster
-
+### Run frontend
 ```bash
-$ kubectl config set-context --current --namespace=kafka-uber
-
-$ cd ./infra
-helm install kafka-uber cp-helm-charts -f ./values.yaml
+$ cd frontend
+$ npm run dev
 ```
+> Webapp available at: http://localhost:5000/
 
-- destroy cluster
-
+### Run backend
 ```bash
-helm unistall kafka-uber ?
+$ cd backend
+$ ./gradlew bootRun
 ```
 
-## kafka topic
+#### Architecture
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6695231/83687878-5a0ab880-a5e4-11ea-8c19-fadd2c6727ad.png" data-canonical-src="https://user-images.githubusercontent.com/6695231/83687878-5a0ab880-a5e4-11ea-8c19-fadd2c6727ad.png" width="600" />
+</p>
 
-### trip
+#### Messages Flow
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6695231/83687943-77d81d80-a5e4-11ea-8e81-cfd8efc0c90d.png" data-canonical-src="ttps://user-images.githubusercontent.com/6695231/83687943-77d81d80-a5e4-11ea-8e81-cfd8efc0c90d.png" width="600" />
+</p>
 
-| key      | value                                                                              |
-| -------- | ---------------------------------------------------------------------------------- |
-| `tripId` | {"STATUS": "", "riderId": String,"driverId": String, from: Location, to: Location} |
 
-### rider
 
-| key       | value                                    |
-| --------- | ---------------------------------------- |
-| `riderId` | {"location": Location, currentTripId:""} |
-
-### driver
-
-| key        | value                                    |
-| ---------- | ---------------------------------------- |
-| `driverId` | {"location": Location, currentTripId:""} |
-
-## TRIP STATUSES
-
-- REQEUSTING
-- CONFIRMED
-- STARTED
-- ENDED
+### Demos
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6695231/83688255-00ef5480-a5e5-11ea-8e69-264be3d4dbfc.gif" data-canonical-src="https://user-images.githubusercontent.com/6695231/83688255-00ef5480-a5e5-11ea-8e69-264be3d4dbfc.gif" width="600" />
+</p>
+<p align="center">
+<img src="https://user-images.githubusercontent.com/6695231/83688657-a86c8700-a5e5-11ea-91f5-b066e756fffb.png" data-canonical-src="https://user-images.githubusercontent.com/6695231/83688657-a86c8700-a5e5-11ea-91f5-b066e756fffb.png" width="600" />
+</p>
