@@ -26,17 +26,15 @@ $ cd backend
 $ ./gradlew bootRun
 ```
 
-#### Architecture
+### Architecture
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6695231/83687878-5a0ab880-a5e4-11ea-8c19-fadd2c6727ad.png" data-canonical-src="https://user-images.githubusercontent.com/6695231/83687878-5a0ab880-a5e4-11ea-8c19-fadd2c6727ad.png" width="600" />
 </p>
 
-#### Messages Flow
+### Messages Flow
 <p align="center">
 <img src="https://user-images.githubusercontent.com/6695231/83687943-77d81d80-a5e4-11ea-8e81-cfd8efc0c90d.png" data-canonical-src="ttps://user-images.githubusercontent.com/6695231/83687943-77d81d80-a5e4-11ea-8e81-cfd8efc0c90d.png" width="600" />
 </p>
-
-
 
 ### Demos
 <p align="center">
