@@ -28,7 +28,7 @@ $ ./gradlew bootRun
 
 ### Architecture
 <p align="center">
-<img src="https://user-images.githubusercontent.com/6695231/83687878-5a0ab880-a5e4-11ea-8c19-fadd2c6727ad.png" data-canonical-src="https://user-images.githubusercontent.com/6695231/83687878-5a0ab880-a5e4-11ea-8c19-fadd2c6727ad.png" width="600" />
+<img src="https://user-images.githubusercontent.com/6695231/83954767-026a8800-a844-11ea-8a9d-0441fcd84696.png" data-canonical-src="https://user-images.githubusercontent.com/6695231/83954767-026a8800-a844-11ea-8a9d-0441fcd84696.png" width="600" />
 </p>
 
 ### Messages Flow
