@@ -7,7 +7,6 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKey
 import org.springframework.data.cassandra.core.mapping.Table
 import java.util.*
 
-
 enum class UserType {
     DRIVER,
     RIDER

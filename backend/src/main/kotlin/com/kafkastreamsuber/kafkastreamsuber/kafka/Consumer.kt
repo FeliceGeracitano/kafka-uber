@@ -23,13 +23,10 @@ import org.springframework.cloud.stream.annotation.StreamListener
 class Consumer {
     @Autowired
     lateinit var userRepository: UserRepository
-
     @Autowired
     lateinit var tripRepository: TripRepository
-
     @Autowired
     private lateinit var wsRider: WSRider
-
     @Autowired
     private lateinit var wsDriver: WSDriver
 
@@ -44,7 +41,7 @@ class Consumer {
             .foreach { _, driver ->
                 wsRider.sendMessageToRider(
                     getRiderId(driver.id),
-                    JsonParser.writeValueAsString(buildUpdateLocationAction(driver))
+                    objectMapper.writeValueAsString(buildUpdateLocationAction(driver))
                 )
             }
 
@@ -68,11 +65,11 @@ class Consumer {
             .toStream()
             .foreach { _, trip ->
                 if (trip.riderId is String) {
-                    wsRider.sendMessageToRider(trip.riderId, JsonParser.writeValueAsString(buildTripUpdateAction(trip)))
+                    wsRider.sendMessageToRider(trip.riderId, objectMapper.writeValueAsString(buildTripUpdateAction(trip)))
                 }
                 if (trip.driverId is String || trip.status == TripStatus.REQUESTING && trip.riderId is String) {
                     val driverId = trip.driverId ?: getDriverId(trip?.riderId)
-                    wsDriver.sendMessage(driverId, JsonParser.writeValueAsString(buildTripUpdateAction(trip)))
+                    wsDriver.sendMessage(driverId, objectMapper.writeValueAsString(buildTripUpdateAction(trip)))
                 }
             }
 

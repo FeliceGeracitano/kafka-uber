@@ -1,6 +1,6 @@
 package com.kafkastreamsuber.kafkastreamsuber.models
 
-import com.kafkastreamsuber.kafkastreamsuber.JsonParser
+import com.kafkastreamsuber.kafkastreamsuber.objectMapper
 
 
 enum class ACTION_TYPE {
@@ -21,7 +21,7 @@ data class EndTripPayload(val tripId: String, val amount: Double, val distance: 
 
 
 val buildUpdateLocationAction = {
-    user: User -> Action(ACTION_TYPE.UPDATE_DRIVER_LOCATION, JsonParser.writeValueAsString(user))
+    user: User -> Action(ACTION_TYPE.UPDATE_DRIVER_LOCATION, objectMapper.writeValueAsString(user))
 }
 
 fun buildTripUpdateAction(trip: Trip): Action {
@@ -31,5 +31,5 @@ fun buildTripUpdateAction(trip: Trip): Action {
         TripStatus.REQUESTING -> ACTION_TYPE.REQUEST_TRIP
         TripStatus.ENDED -> ACTION_TYPE.END_TRIP
     }
-    return Action(actionType, JsonParser.writeValueAsString(trip))
+    return Action(actionType, objectMapper.writeValueAsString(trip))
 }

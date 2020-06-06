@@ -1,24 +1,34 @@
-spring.cloud.stream.kafka.streams.binder.configuration.commit.interval.ms: 0
-spring.cloud.stream.kafka.streams:
-  binder:
-    configuration:
-      heartbeat.interval.ms: 5000
-  bindings.input_1.consumer.application-id: read-users
-  bindings.input_2.consumer.application-id: read-trip
-
-spring.cloud.stream.bindings.input_1:
-  destination: user
-spring.cloud.stream.bindings.output_1:
-  destination: user
-spring.cloud.stream.bindings.input_2:
-  destination: trip
-spring.cloud.stream.bindings.output_2:
-  destination: trip
-
-
-spring.cloud.stream.bindings.input.consumer.useNativeDecoding: true
-
 spring:
+  cloud:
+    stream:
+      kafka:
+        streams:
+          binder:
+            configuration:
+              commit.interval.ms: 0
+              heartbeat.interval.ms: 5000
+          bindings.input_1.consumer.application-id: read-users
+          bindings.input_2.consumer.application-id: read-trip
+      bindings:
+        input_1.destination: user
+        output_1.destination: user
+        input_2.destination: trip
+        output_2.destination: trip
   devtools:
     livereload:
       port: 35730
+  level:
+    org:
+      springframework:
+        kafka:
+          config: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:*
+
+cassandra:
+  contactpoints: 127.0.0.1
+  port: 9042

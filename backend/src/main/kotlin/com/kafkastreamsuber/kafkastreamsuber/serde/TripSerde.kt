@@ -1,7 +1,7 @@
 package org.jetbrains.kotlin.demo.serde
 
-import com.kafkastreamsuber.kafkastreamsuber.JsonParser
 import com.kafkastreamsuber.kafkastreamsuber.models.Trip
+import com.kafkastreamsuber.kafkastreamsuber.objectMapper
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serializer
@@ -16,7 +16,7 @@ class TripSerde : Serde<Trip> {
 class TripSerializer : Serializer<Trip> {
     override fun serialize(topic: String, data: Trip?): ByteArray? {
         if (data == null) return null
-        return JsonParser.writeValueAsBytes(data)
+        return objectMapper.writeValueAsBytes(data)
     }
     override fun close() {}
     override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {}
@@ -25,7 +25,7 @@ class TripSerializer : Serializer<Trip> {
 class TripDeserializer : Deserializer<Trip> {
     override fun deserialize(topic: String, data: ByteArray?): Trip? {
         if (data == null) return null
-        return JsonParser.readValue(data, Trip::class.java)
+        return objectMapper.readValue(data, Trip::class.java)
     }
     override fun close() {}
     override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {}

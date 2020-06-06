@@ -1,6 +1,5 @@
 package com.kafkastreamsuber.kafkastreamsuber.ws
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.kafkastreamsuber.kafkastreamsuber.models.Trip
 import com.kafkastreamsuber.kafkastreamsuber.models.TripStatus
 import com.kafkastreamsuber.kafkastreamsuber.models.User
@@ -8,6 +7,7 @@ import com.kafkastreamsuber.kafkastreamsuber.models.UserType
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Producer
 import com.kafkastreamsuber.kafkastreamsuber.kafka.Store
 import com.kafkastreamsuber.kafkastreamsuber.models.*
+import com.kafkastreamsuber.kafkastreamsuber.objectMapper
 import com.kafkastreamsuber.kafkastreamsuber.parseURLQuery
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
@@ -41,7 +41,6 @@ class WSRiderConfig : WebSocketConfigurer {
 @Component
 class WSRider : TextWebSocketHandler() {
     private val sessionList = mutableMapOf<String, WebSocketSession>();
-    private val jsonParser = jacksonObjectMapper()
     @Autowired
     private lateinit var store: Store
     @Autowired
@@ -61,10 +60,8 @@ class WSRider : TextWebSocketHandler() {
         session.attributes["riderId"] = riderId;
         sessionList[riderId] = session;
         val trip = store.getLastTrip(riderId)
-        val payload = if (trip !== null) jacksonObjectMapper().writeValueAsString(trip) else null
-        val messageString = jacksonObjectMapper().writeValueAsString(
-                Action(ACTION_TYPE.SYNC_STATUS, payload)
-        )
+        val payload = if (trip !== null) objectMapper.writeValueAsString(trip) else null
+        val messageString = objectMapper.writeValueAsString(Action(ACTION_TYPE.SYNC_STATUS, payload))
         session.sendMessage(TextMessage(messageString))
     }
 
@@ -73,7 +70,7 @@ class WSRider : TextWebSocketHandler() {
         val jsonString = textMessage.payload.toString()
         val riderId = session.attributes["riderId"] as String
         val action = try {
-            jsonParser.readValue(jsonString, Action::class.java)
+            objectMapper.readValue(jsonString, Action::class.java)
         } catch (_: java.lang.Exception) {
             return
         }
@@ -81,8 +78,7 @@ class WSRider : TextWebSocketHandler() {
         if (action.payload == null) throw Error("Missing Location Payload")
         when (action?.type) {
             ACTION_TYPE.REQUEST_TRIP -> {
-                val (riderLocation, destination
-                ) = jsonParser.readValue(action.payload, RequestRidePayload::class.java)
+                val (riderLocation, destination) = objectMapper.readValue(action.payload, RequestRidePayload::class.java)
                 val uuid: UUID = UUID.randomUUID()
                 val tripUUID: String = uuid.toString()
                 val trip = Trip(
@@ -103,12 +99,13 @@ class WSRider : TextWebSocketHandler() {
                 producer.produceTrip(trip)
                 producer.produceUser(rider)
             }
-            else -> {}
+            else -> {
+            }
         }
     }
 
     private fun emit(session: WebSocketSession, msg: Action) =
-            session.sendMessage(TextMessage(jacksonObjectMapper().writeValueAsString(msg)))
+        session.sendMessage(TextMessage(objectMapper.writeValueAsString(msg)))
 
     fun sendMessageToRider(riderId: String, msg: String) {
         val session = sessionList[riderId]
