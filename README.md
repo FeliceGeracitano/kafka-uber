@@ -2,8 +2,11 @@
 ![BE build CI](https://github.com/FeliceGeracitano/kafka-uber/workflows/BE%20build%20CI/badge.svg?branch=master)
 
 # kafka-uber
-Streaming application POC - https://medium.com/@felice.geracitano/zero-to-demo-streaming-application-part-1-frontend-ec6cb95ee7d2
+Streaming application POC
 
+https://medium.com/@felice.geracitano/zero-to-demo-streaming-application-frontend-ec6cb95ee7d2
+https://medium.com/@felice.geracitano/zero-to-streaming-application-backend-bf18fd1207ae
+https://medium.com/@felice.geracitano/zero-to-streaming-application-infrastructure-6e4b98d63e1
 
 ### Run dependecies
 ```bash
